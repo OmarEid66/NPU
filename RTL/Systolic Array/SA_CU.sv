@@ -47,10 +47,12 @@ module SA_CU #(
     input  logic clk      ,
     input  logic rst_n    ,
 
+    input  logic start    ,
     input  logic valid_in ,
     output logic load_w   ,
     output logic valid_out,
-    output logic busy     
+    output logic busy     ,
+    output logic done     
 );
 
 // ── State encoding ───────────────────────────────────────────
@@ -96,7 +98,7 @@ always_comb begin
         // ── IDLE ─────────────────────────────────────────────
         IDLE : begin
             cnt_rst = 1'b1;              // keep counter at 0
-            if (valid_in)
+            if (start)
                 next_state = LOAD_W;
         end
 
@@ -159,6 +161,7 @@ end
 // latch weight_in (it would capture invalid data on that cycle).
 assign load_w    = (state == LOAD_W) && valid_in;
 assign valid_out = (state == OUTPUT);
+assign done      = (state == OUTPUT && cnt == N_SIZE - 1);
 assign busy      = (state != IDLE);
 
 endmodule

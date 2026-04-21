@@ -73,10 +73,12 @@ logic                   rst_n;
 logic [DATA_W-1:0]      act_in    [N];
 logic [DATA_W-1:0]      weight_in [N];
 logic                   transpose_en;
+logic                   start ;
 logic                   valid_in;
 logic                   valid_out;
 logic                   busy;
 logic [DATA_W_OUT-1:0]  psum_out  [N];
+logic                   done     ;
 
 // ── DUT ───────────────────────────────────────────────────────
 SA_NxN_top #(
@@ -89,9 +91,11 @@ SA_NxN_top #(
     .act_in      (act_in      ),
     .weight_in   (weight_in   ),
     .transpose_en(transpose_en),
+    .start       (start       ),
     .valid_in    (valid_in    ),
     .valid_out   (valid_out   ),
     .busy        (busy        ),
+    .done        (done        ),
     .psum_out    (psum_out    )
 );
 
@@ -143,10 +147,10 @@ task automatic run_matmul(
     transpose_en = t_en;
 
     // ── START PULSE: IDLE → LOAD_W ──────────────────────────
-    // valid_in=1 in IDLE → CU moves to LOAD_W next cycle.
+    // start=1 in IDLE → CU moves to LOAD_W next cycle.
     // load_w=0 this cycle (CU still in IDLE). Nothing loaded.
     for (int c=0; c<N; c++) weight_in[c] = '0;
-    valid_in = 1;
+    start = 1;
     tick;                   // IDLE → LOAD_W
 
     // ── LOAD_W: N ticks ─────────────────────────────────────

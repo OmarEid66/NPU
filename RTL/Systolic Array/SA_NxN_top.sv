@@ -57,9 +57,11 @@ module SA_NxN_top #(
     input  logic                    transpose_en,        // 0 = load from bottom, 1 = load from right
 
     // Handshake
+    input  logic                    start,
     input  logic                    valid_in,            // data-valid / matmul start trigger
     output logic                    valid_out,           // HIGH for N_SIZE cycles during OUTPUT
     output logic                    busy,                // HIGH while any phase is active
+    output logic                    done,
 
     // Result
     output logic [DATA_W_OUT-1:0]   psum_out  [N_SIZE]  // de-skewed output (valid when valid_out=1)
@@ -79,10 +81,12 @@ SA_CU #(
 ) u_cu (
     .clk      (clk      ),
     .rst_n    (rst_n    ),
+    .start    (start    ),
     .valid_in (valid_in ),
     .load_w   (load_w   ),
     .valid_out(valid_out),
-    .busy     (busy     )
+    .busy     (busy     ),
+    .done     (done     )
 );
 
 // ── Activation skew — TRSRL ───────────────────────────────────────
