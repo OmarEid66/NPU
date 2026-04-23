@@ -48,11 +48,11 @@ logic [SRAM_DATA_W-1:0] sram_do1;    // read data (32-bit)
 
 // Instruction Memory Signals — RAM128x16 single port (1RW)
 // Port 0: Read-Write → host writes program / CU reads instructions
-logic [INST_BE_W-1:0]   inst_we0;    // byte write enable (2-bit)
+logic [INST_BE_W-1:0]   inst_we0;    // byte write enable (4-bit)
 logic                   inst_en0;    // port enable
-logic [INST_ADDR_W-1:0] inst_a0;     // address (7-bit, 0-127)
-logic [INST_DATA_W-1:0] inst_di0;    // write data (16-bit) ← host writes program
-logic [INST_DATA_W-1:0] inst_do0;    // read data  (16-bit) ← CU reads instruction
+logic [INST_ADDR_W-1:0] inst_a0;     // address (5-bit, 0-31)
+logic [INST_DATA_W-1:0] inst_di0;    // write data (32-bit) ← host writes program
+logic [INST_DATA_W-1:0] inst_do0;    // read data  (32-bit) ← CU reads instruction
 
 
 // ACT Ping-Pong Buffer Signals
