@@ -92,6 +92,10 @@ logic                      wgt_active_bank;    // 0=BankA active 1=BankB active
 logic       [INST_ADDR_W-1:0] PC ;
 logic       [INST_DATA_W-1:0] inst_data ;
 logic inst_rd_en ;
+logic cu_sram_en0;
+logic [SRAM_ADDR_W-1:0] cu_sram_a0 ;
+logic cu_sram_en1 ;
+logic [SRAM_ADDR_W-1:0] cu_sram_a1 ;
 
 // SA 
 logic [DATA_W-1:0]       act_in    [N_SIZE];
@@ -108,6 +112,11 @@ logic [DATA_W_OUT-1:0]   psum_out  [N_SIZE]  // de-skewed output (valid when val
 assign inst_a0 = PC ;
 assign inst_data = inst_do0 ;
 assign inst_en0 = inst_rd_en;
+assign sram_en0 = cu_sram_en0 ;
+assign sram_a0 = cu_sram_a0 ;
+assign sram_en1 = cu_sram_en1 ;
+assign sram_a1 = cu_sram_a1 ;
+
 genvar i;
 generate
     for (i = 0; i < N_SIZE; i++) begin : ACT_UNPACK
@@ -137,6 +146,34 @@ CU #() cu (
     .inst_rd_en(inst_rd_en),
     .PC(PC),
 
+    // SRAM Port 0 (RW — CU reads for LOAD_ACT / LOAD_ACT_WGT)
+    .sram_en0(cu_sram_en0),
+    .sram_a0(cu_sram_a0),
+    .sram_do0(sram_do0),
+
+    // SRAM Port 1 (Read-only — CU reads for LOAD_WGT / LOAD_ACT_WGT)
+    .sram_en1(cu_sram_en1),
+    .sram_a1(cu_sram_a1),
+    .sram_do1(sram_do1),
+
+    // ACT Ping-Pong Buffer — write port
+    .act_wr_en(act_wr_en),
+    .act_wr_byte_addr(act_wr_byte_addr),
+    .act_wr_data(act_wr_data),
+    .act_swap(act_swap),
+    .act_fill_done(act_fill_done),
+
+    // WGT Ping-Pong Buffer — write port
+    .wgt_wr_en(wgt_wr_en),
+    .wgt_wr_byte_addr(wgt_wr_byte_addr),
+    .wgt_wr_data(wgt_wr_data),
+    .wgt_swap(wgt_swap),
+    .wgt_fill_done(wgt_fill_done),
+
+    // PP Buffer read rows (to SA)
+    .act_rd_row(act_rd_row),
+    .wgt_rd_row(wgt_rd_row),
+
     // SA
     .sa_valid_out(sa_valid_out),
     .sa_busy(sa_busy),
@@ -144,6 +181,9 @@ CU #() cu (
     .sa_start(sa_start),
     .sa_valid_in(sa_valid_in),
     .sa_transpose_en(sa_transpose_en),
+
+    // Weight Ping-Pong Buffer
+    .wgt_rd_row(wgt_rd_row),
 
     .npu_done(npu_done)
 
