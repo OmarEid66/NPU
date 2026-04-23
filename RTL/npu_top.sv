@@ -2,6 +2,9 @@ module npu_top #(parameter DATA_W = 8, parameter DATA_W_PATH = 32, parameter SA_
 (
 input       clk,
 input       rst_n,
+input       start_npu,
+
+output      npu_done
 );
 
 
@@ -85,6 +88,37 @@ logic                      wgt_swap;           // pulse to swap banks
 logic                      wgt_fill_done;      // inactive bank fully loaded
 logic                      wgt_active_bank;    // 0=BankA active 1=BankB active
 
+// Control Unit 
+logic       [INST_ADDR_W-1:0] PC ;
+logic       [INST_DATA_W-1:0] inst_data ;
+logic inst_rd_en ;
+
+// SA 
+logic [DATA_W-1:0]       act_in    [N_SIZE];
+logic [DATA_W-1:0]       weight_in [N_SIZE];
+logic                    sa_transpose_en;
+
+logic                    sa_start,
+logic                    sa_valid_in,            // data-valid / matmul start trigger
+logic                    sa_valid_out,           // HIGH for N_SIZE cycles during OUTPUT
+logic                    sa_busy,                // HIGH while any phase is active
+logic                    sa_done,
+logic [DATA_W_OUT-1:0]   psum_out  [N_SIZE]  // de-skewed output (valid when valid_out=1)
+ 
+assign inst_a0 = PC ;
+assign inst_data = inst_do0 ;
+assign inst_en0 = inst_rd_en;
+genvar i;
+generate
+    for (i = 0; i < N_SIZE; i++) begin : ACT_UNPACK
+        assign act_in[i] = act_rd_data[i*DATA_W +: DATA_W];
+    end
+
+    for (i = 0; i < N_SIZE; i++) begin : WGT_UNPACK
+        assign weight_in[i] = wgt_rd_data[i*DATA_W +: DATA_W];
+    end
+endgenerate
+
 RAM32 u_inst_mem (
     .CLK (clk),
     .WE0 (inst_we0),    // 4-bit byte enable
@@ -95,6 +129,24 @@ RAM32 u_inst_mem (
 );
 
 CU #() cu (
+    .clk(clk),
+    .rst_n(rst_n),
+    .start(start_npu),
+    
+    .inst_data(inst_data),
+    .inst_rd_en(inst_rd_en),
+    .PC(PC),
+
+    // SA
+    .sa_valid_out(sa_valid_out),
+    .sa_busy(sa_busy),
+    .sa_done(sa_done),
+    .sa_start(sa_start),
+    .sa_valid_in(sa_valid_in),
+    .sa_transpose_en(sa_transpose_en),
+
+    .npu_done(npu_done)
+
 
 );
 
@@ -164,22 +216,22 @@ pingpong_buffer #(
 
 
 SA_NxN_top #(DATA_W,DATA_W_PATH,SA_SIZE) SA (
-.clk(clk),
-.rst_n(rst_n),
+    .clk(clk),
+    .rst_n(rst_n),
 
-.act_in(),
-.weight_in(),
+    .act_in(act_in),
+    .weight_in(weight_in),
 
-.transpose_en(),
+    .transpose_en(sa_transpose_en),
 
-.start(),
-.valid_in(),
+    .start(sa_start),
+    .valid_in(sa_valid_in),
 
-.valid_out(),
-.busy(),
-.done(),
+    .valid_out(sa_valid_out),
+    .busy(sa_busy),
+    .done(sa_done),
 
-.psum_out()
+    .psum_out(psum_out)
 );
 
 endmodule
