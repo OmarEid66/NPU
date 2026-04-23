@@ -98,16 +98,16 @@ logic cu_sram_en1 ;
 logic [SRAM_ADDR_W-1:0] cu_sram_a1 ;
 
 // SA 
-logic [DATA_W-1:0]       act_in    [N_SIZE];
-logic [DATA_W-1:0]       weight_in [N_SIZE];
+logic [DATA_W-1:0]       act_in    [SA_SIZE];
+logic [DATA_W-1:0]       weight_in [SA_SIZE];
 logic                    sa_transpose_en;
 
-logic                    sa_start,
-logic                    sa_valid_in,            // data-valid / matmul start trigger
-logic                    sa_valid_out,           // HIGH for N_SIZE cycles during OUTPUT
-logic                    sa_busy,                // HIGH while any phase is active
-logic                    sa_done,
-logic [DATA_W_OUT-1:0]   psum_out  [N_SIZE]  // de-skewed output (valid when valid_out=1)
+logic                    sa_start;
+logic                    sa_valid_in;            // data-valid / matmul start trigger
+logic                    sa_valid_out;           // HIGH for N_SIZE cycles during OUTPUT
+logic                    sa_busy;                // HIGH while any phase is active
+logic                    sa_done;
+logic [DATA_W_PATH-1:0]   psum_out  [SA_SIZE];  // de-skewed output (valid when valid_out=1)
  
 assign inst_a0 = PC ;
 assign inst_data = inst_do0 ;
@@ -119,11 +119,11 @@ assign sram_a1 = cu_sram_a1 ;
 
 genvar i;
 generate
-    for (i = 0; i < N_SIZE; i++) begin : ACT_UNPACK
+    for (i = 0; i < SA_SIZE; i++) begin : ACT_UNPACK
         assign act_in[i] = act_rd_data[i*DATA_W +: DATA_W];
     end
 
-    for (i = 0; i < N_SIZE; i++) begin : WGT_UNPACK
+    for (i = 0; i < SA_SIZE; i++) begin : WGT_UNPACK
         assign weight_in[i] = wgt_rd_data[i*DATA_W +: DATA_W];
     end
 endgenerate

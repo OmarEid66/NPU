@@ -271,7 +271,7 @@ assign inst_rd_en = (state == FETCH);
 //  is_load_act : this instruction writes the ACT ping-pong buffer
 //  is_load_wgt : this instruction writes the WGT ping-pong buffer
 //  is_load_any : any of the above
-logic is_load_act, is_load_wgt, is_load_any;
+logic is_load_act, is_load_wgt, is_load_any, is_load_a_w;
  
 assign is_load_act = (opcode == LOAD_ACT) || (opcode == LOAD_ACT_WGT);
 assign is_load_wgt = (opcode == LOAD_WGT) || (opcode == LOAD_ACT_WGT);
@@ -288,12 +288,14 @@ assign ld_active = (state == EXECUTE) && is_load_any;
 
 // Capture tile base address at DECODE
 always_ff @(posedge clk or negedge rst_n) begin
-    if (!rst_n)
+    if (!rst_n) begin
         ld_base_r_a <= '0;
         ld_base_r_b <= '0;
-    else if (state == DECODE && is_load_any)
+    end
+    else if (state == DECODE && is_load_any) begin
         ld_base_r_a <= tile_addr_a;
         ld_base_r_b <= tile_addr_b;
+    end
 end
 
 // ld_cnt: free-running 0..15 while ld_active, resets otherwise
@@ -348,7 +350,7 @@ always_comb begin
     end
 end
 
-/ ================================================================
+// ================================================================
 //  ACT Ping-Pong write  ← data comes from sram_do0 (Port 0)
 // ================================================================
 always_comb begin
@@ -423,7 +425,7 @@ always_comb begin
 
         CP_LOAD_W: begin
             conv_cnt_en = 1'b1;
-            if (conv_cnt == N_SIZE - 1) begin
+            if (conv_cnt == SA_SIZE - 1) begin
                 conv_cnt_rst    = 1'b1;
                 conv_cnt_en     = 1'b0;
                 next_conv_phase = CP_FEED_A;
@@ -432,7 +434,7 @@ always_comb begin
 
         CP_FEED_A: begin
             conv_cnt_en = 1'b1;
-            if (conv_cnt == N_SIZE - 1) begin
+            if (conv_cnt == SA_SIZE - 1) begin
                 conv_cnt_rst    = 1'b1;
                 conv_cnt_en     = 1'b0;
                 next_conv_phase = CP_WAIT;
