@@ -95,10 +95,11 @@ logic unit_done;
 typedef enum logic [2:0] {
     IDLE    = 3'd0,
     FETCH   = 3'd1,
-    DECODE  = 3'd2,
-    EXECUTE = 3'd3,
-    NEXT    = 3'd4,
-    HALTED  = 3'd5
+    STALL   = 3'd2,
+    DECODE  = 3'd3,
+    EXECUTE = 3'd4,
+    NEXT    = 3'd5,
+    HALTED  = 3'd6
 } state_t;
 
 // Sub-phase for CONV execution
@@ -204,6 +205,10 @@ always_comb begin
         end
 
         FETCH: begin
+            next_state = STALL;
+        end
+
+        STALL: begin
             next_state = DECODE;
         end
 
@@ -279,7 +284,7 @@ assign is_load_a_w = (opcode == LOAD_ACT_WGT);
 assign is_load_any = (opcode == LOAD_ACT) || (opcode == LOAD_WGT) ||
                      (opcode == LOAD_ACT_WGT);
 
-logic [3:0] ld_cnt;
+logic [4:0] ld_cnt;
 logic [7:0] ld_base_r_a;
 logic [7:0] ld_base_r_b;
 logic       ld_active;
@@ -304,20 +309,20 @@ always_ff @(posedge clk or negedge rst_n) begin
         ld_cnt <= '0;
     else if (!ld_active)
         ld_cnt <= '0;
-    else if (ld_cnt <= 4'd15)
+    else if (ld_cnt < 5'd16)      // runs 0→15, holds at 16
         ld_cnt <= ld_cnt + 1'b1;
 end
 
 // 1-cycle pipeline registers for write-back
 logic       wr_pend_r;
-logic [3:0] wr_addr_r;
+logic [4:0] wr_addr_r;
 
 always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
         wr_pend_r <= 1'b0;
         wr_addr_r <= '0;
     end else begin
-        wr_pend_r <= ld_active && (ld_cnt <= 4'd15);
+        wr_pend_r <= ld_active && (ld_cnt < 5'd16);  
         wr_addr_r <= ld_cnt;
     end
 end
@@ -328,9 +333,9 @@ end
 always_comb begin
     sram_en0 = 1'b0;
     sram_a0  = '0;
-    if (ld_active && is_load_act && (ld_cnt <= 4'd15)) begin
+    if (ld_active && is_load_act && (ld_cnt <= 4'd16)) begin
         sram_en0 = 1'b1;
-        sram_a0  = ld_base_r_a + {4'b0, ld_cnt};
+        sram_a0  = ld_base_r_a + {3'b0, ld_cnt};
     end
 end
  
@@ -340,12 +345,12 @@ end
 always_comb begin
     sram_en1 = 1'b0;
     sram_a1  = '0;
-    if (ld_active && is_load_wgt && (ld_cnt <= 4'd15)) begin
+    if (ld_active && is_load_wgt && (ld_cnt < 5'd16)) begin
         sram_en1 = 1'b1;
         if (!is_load_a_w) begin
-            sram_a1  = ld_base_r_a + {4'b0, ld_cnt};
+            sram_a1  = ld_base_r_a + {3'b0, ld_cnt};
         end else begin
-            sram_a1  = ld_base_r_b + {4'b0, ld_cnt};
+            sram_a1  = ld_base_r_b + {3'b0, ld_cnt};
         end
     end
 end

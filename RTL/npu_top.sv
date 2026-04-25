@@ -182,9 +182,6 @@ CU #() cu (
     .sa_valid_in(sa_valid_in),
     .sa_transpose_en(sa_transpose_en),
 
-    // Weight Ping-Pong Buffer
-    .wgt_rd_row(wgt_rd_row),
-
     .npu_done(npu_done)
 
 
