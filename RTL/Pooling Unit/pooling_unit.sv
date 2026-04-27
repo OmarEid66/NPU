@@ -9,7 +9,7 @@ module pooling_unit
 (
     input  logic clk,arstn,en,
     input  logic [DATA_WIDTH-1:0] in [0:no_rows * no_cols-1], 
-    output logic [DATA_WIDTH+1:0] out [0:(2**(filter_row * filter_col))-1],
+    output logic [DATA_WIDTH+1:0] out [0:((no_cols-1) * (no_rows-1))-1],
     output logic done
 );
 
@@ -17,12 +17,12 @@ localparam OUT_COLS = no_cols - filter_col + 1 ;
 localparam OUT_ROWS = no_rows - filter_row + 1 ;
 localparam TOTAL_OUT = OUT_ROWS * OUT_COLS ;
 localparam TOTAL_IN = no_rows * no_cols ;
-localparam TOTAL_FILTER = filter_row * filter_col ;
+// localparam TOTAL_FILTER = filter_row * filter_col ;
 localparam ROW_JUMP = filter_col ;
 
-logic [$clog2((no_rows*no_cols))-1:0] pool_addr [0:3];
-logic [(filter_row+filter_col)-1:0] counter ;
-logic [filter_col-1:0] col_count;
+logic [$clog2(TOTAL_IN)-1:0] pool_addr [0:3];
+logic [$clog2(TOTAL_OUT)-1:0] counter ;
+logic [$clog2(OUT_COLS)-1:0] col_count;
 
 
 always_ff @(posedge clk, negedge arstn) begin
