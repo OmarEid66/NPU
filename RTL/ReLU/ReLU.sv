@@ -1,5 +1,5 @@
 // ============================================================
-//  ReLU Module (Vectorized, Registered)
+//  ReLU Module (Vectorized, Combinational)
 // ------------------------------------------------------------
 //  Description:
 //    Implements a parameterizable Rectified Linear Unit (ReLU)
@@ -9,59 +9,31 @@
 //        if (value < 0) → output = 0
 //        else           → output = value
 //
-//    The design is fully parallel and pipelined (1-cycle latency),
-//    making it suitable for neural network accelerators and SIMD
-//    datapaths.
+//    Fully combinational — no registers, zero latency.
+//    The parent module (relu_unit) handles output registration.
 //
 //  Parameters:
 //    DATA_WIDTH : Bit-width of each input/output element
 //    ARRAY_SIZE : Number of parallel elements (vector size)
 //
-//  Interface:
-//    clk       : Clock signal
-//    rst_n     : Active-low asynchronous reset
-//    in_data   : Input vector (ARRAY_SIZE elements)
-//    out_data  : Output vector (ARRAY_SIZE elements)
-//
 //  Notes:
-//    - ReLU decision is implemented using the MSB (sign bit),
-//      avoiding a full comparator for better area/timing.
-//    - Each element is processed independently (fully parallel).
-//    - Output is registered → 1 cycle latency.
+//    - ReLU decision uses MSB (sign bit) — no full comparator.
+//    - Each element processed independently (fully parallel).
 //
 // ============================================================
 
 module ReLU #(
-    parameter int DATA_WIDTH = 8,   // Bit-width of each element
-    parameter int ARRAY_SIZE = 8    // Number of elements in the vector
-) (
-    input  logic clk,                                       // System clock
-    input  logic rst_n,                                     // Active-low reset
-    input  logic signed [DATA_WIDTH-1:0] in_data [0:ARRAY_SIZE-1],  // Input vector
-    output logic signed [DATA_WIDTH-1:0] out_data[0:ARRAY_SIZE-1]   // Output vector
+    parameter int DATA_WIDTH = 8,
+    parameter int ARRAY_SIZE = 8
+)(
+    input  logic signed [DATA_WIDTH-1:0] in_data  [0:ARRAY_SIZE-1],
+    output logic signed [DATA_WIDTH-1:0] out_data [0:ARRAY_SIZE-1]
 );
 
-    // --------------------------------------------------------
-    //  Generate parallel ReLU units (one per vector element)
-    // --------------------------------------------------------
     genvar i;
-    generate 
+    generate
         for (i = 0; i < ARRAY_SIZE; i++) begin : relu_array
-
-            // Sequential logic: registers output (1-cycle latency)
-            always_ff @(posedge clk or negedge rst_n) begin
-                if (!rst_n) begin
-                    // Reset output to zero
-                    out_data[i] <= '0;
-                end 
-                else begin
-                    // ReLU operation:
-                    // If MSB (sign bit) = 1 → negative → clamp to 0
-                    // Else → pass input value unchanged
-                    out_data[i] <= in_data[i][DATA_WIDTH-1] ? '0 : in_data[i];
-                end
-            end
-
+            assign out_data[i] = in_data[i][DATA_WIDTH-1] ? '0 : in_data[i];
         end
     endgenerate
 
