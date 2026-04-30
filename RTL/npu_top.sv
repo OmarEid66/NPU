@@ -352,7 +352,7 @@ mux2x1 #(7) mux_imem_addr (
 );
 
 // ── Instruction Memory ────────────────────────────────────────
-RAM32 u_inst_mem (
+RAM32_ u_inst_mem (
     .CLK (clk),
     .WE0 (inst_we0),
     .EN0 (inst_en0),
@@ -382,7 +382,7 @@ mux4x1 #(8) mux_sram_addr (
 );
 
 // ── Data SRAM (dual-port: 1RW + 1R) ──────────────────────────
-RAM256x32_1RW1R u_data_sram (
+RAM256x32_1RW1R_ u_data_sram (
     .CLK (clk),
     .WE0 (sram_we0),
     .EN0 (sram_en0),
