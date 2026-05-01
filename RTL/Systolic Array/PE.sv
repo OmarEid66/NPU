@@ -60,13 +60,16 @@ logic [DATA_W-1:0]    act_reg;   // registered activation (forwarded to right ne
 logic [DATA_W_OUT-1:0] psum_reg; // registered partial sum (forwarded downward)
 
 // ── Combinational MAC ─────────────────────────────────────────────
-// Multiply is done in full precision (2*DATA_W bits) to avoid
-// intermediate overflow, then added to the incoming partial sum.
-logic [2*DATA_W-1:0]  mac_mul;
-logic [DATA_W_OUT-1:0] mac_res;
+// Multiply is done in full signed precision (2*DATA_W bits) to avoid
+// intermediate overflow, then sign-extended and added to the incoming
+// partial sum.  Both operands are cast to signed so that negative
+// INT8 values (e.g. 0xFF = -1) multiply correctly instead of being
+// treated as large unsigned numbers.
+logic signed [2*DATA_W-1:0]   mac_mul;
+logic signed [DATA_W_OUT-1:0] mac_res;
 
-assign mac_mul = in_act * W_reg;
-assign mac_res = mac_mul + in_psum;
+assign mac_mul = $signed(in_act) * $signed(W_reg);
+assign mac_res = DATA_W_OUT'(mac_mul) + $signed(in_psum);
 
 // ── Weight register ───────────────────────────────────────────────
 // Latches on the first load_w=1 cycle and holds the value for the
