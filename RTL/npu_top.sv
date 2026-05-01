@@ -28,36 +28,43 @@
 module npu_top #(
     parameter DATA_W      = 8,
     parameter DATA_W_PATH = 32,
-    parameter SA_SIZE     = 8
+    parameter SA_SIZE     = 8,
+    parameter INST_ADDR_W = 5,
+    parameter INST_DATA_W = 32,
+    parameter SRAM_DATA_W = 32,
+    parameter SRAM_ADDR_W = 8
+
+
 )(
     input  logic        clk,
     input  logic        rst_n,
 
     // ── Host memory load mode ─────────────────────────────────
     input  logic        load_imem,       // HIGH while host loads instruction memory
-    input  logic        load_dmem,       // HIGH while host loads/reads data SRAM
+    input  logic        load_dmem,       // HIGH while host loads data SRAM
+    input  logic        dmem_rd_host,
 
     // ── Instruction memory write port (host → IMEM) ───────────
-    input  logic        imem_wr_we,      // byte-enable (4'hF = full word)
+    input  logic [3:0]  imem_wr_we,      // byte-enable (4'hF = full word)
     input  logic        imem_wr_en,      // write strobe (1-cycle pulse)
-    input  logic [6:0]  imem_wr_addr,    // word address (0-127)
-    input  logic [31:0] imem_wr_data,    // instruction word
+    input  logic [INST_ADDR_W-1:0]  imem_wr_addr,    // word address
+    input  logic [INST_DATA_W-1:0] imem_wr_data,    // instruction word
 
     // ── Data SRAM write port (host → DMEM) ───────────────────
     input  logic        dmem_wr_en,      // write strobe (1-cycle pulse)
     input  logic [3:0]  dmem_wr_be,      // byte enable (4-bit mask)
-    input  logic [7:0]  dmem_wr_addr,    // word address (0-255)
-    input  logic [31:0] dmem_wr_data,    // write data
+    input  logic [SRAM_ADDR_W-1:0]  dmem_wr_addr,    // word address (0-255)
+    input  logic [SRAM_DATA_W-1:0] dmem_wr_data,    // write data
 
     // ── Data SRAM read port (host ← DMEM) ────────────────────
     input  logic        dmem_rd_en,      // read enable
-    input  logic [7:0]  dmem_rd_addr,    // word address (0-255)
-    output logic [31:0] dmem_rd_data,    // read data (combinational from port 0)
+    input  logic [SRAM_ADDR_W-1:0]  dmem_rd_addr,    // word address (0-255)
+    output logic [SRAM_DATA_W-1:0] dmem_rd_data,    // read data (combinational from port 0)
 
     // ── NPU control ───────────────────────────────────────────
     input  logic        start_npu,       // pulse to start NPU execution
-    output logic        done_processing, // HIGH when HALT instruction reached
-    output logic        npu_done         // alias for done_processing
+    output logic        done_processing, // when all instructions in instr memory is finsihed like asking new instructions
+    output logic        npu_done         // HIGH when HALT instruction reached
 );
 
 // ================================================================
@@ -65,13 +72,9 @@ module npu_top #(
 // ================================================================
 
 // SRAM geometry
-localparam SRAM_DATA_W = 32;
-localparam SRAM_ADDR_W = 8;
 localparam SRAM_BE_W   = SRAM_DATA_W / 8;   // 4
 
 // Instruction memory geometry
-localparam INST_DATA_W = 32;
-localparam INST_ADDR_W = 5;
 localparam INST_BE_W   = 4;
 
 // Ping-Pong buffer geometry (shared by ACT and WGT)
@@ -138,7 +141,6 @@ logic [1:0]  select_apb_npu_addr; // SRAM address mux select
 
 // ── CU → SRAM port signals ────────────────────────────────────
 logic                   cu_sram_en0;
-logic [SRAM_BE_W-1:0]   cu_sram_we0;
 logic [SRAM_ADDR_W-1:0] cu_sram_a0;
 logic                   cu_sram_en1;
 logic [SRAM_ADDR_W-1:0] cu_sram_a1;
@@ -147,6 +149,8 @@ logic [SRAM_ADDR_W-1:0] cu_sram_a1;
 logic [INST_ADDR_W-1:0] PC;
 logic [INST_DATA_W-1:0] inst_data;
 logic                   inst_rd_en;
+
+logic                   addr_st_rel;
 
 // ── scale register ────────────────────────────────────────────
 logic scale_wr_en;
@@ -180,29 +184,31 @@ logic        req_done;
 logic [4:0]  n_scale;
 logic                        preq_wr_en;
 logic [$clog2(SA_SIZE)-1:0]  preq_wr_addr;
-logic signed [DATA_W-1:0]    preq_wr_data [SA_SIZE];
+logic [DATA_W-1:0]    preq_wr_data [SA_SIZE];
 
 // ── preq_buffer ───────────────────────────────────────────────
 logic [$clog2(SA_SIZE)-1:0]  preq_rd_addr;
-logic signed [DATA_W-1:0]    preq_rd_data [SA_SIZE];
+logic [DATA_W-1:0]    preq_rd_data [SA_SIZE];
+logic [$clog2(SA_SIZE)-1:0]    preq_rd_addr_rel ;
+logic [$clog2(SA_SIZE)-1:0]    preq_rd_addr_st ;
 
 // ── relu_unit ─────────────────────────────────────────────────
 logic        relu_start;
 logic        relu_done;
 logic                        relu_wr_en;
 logic [$clog2(SA_SIZE)-1:0]  relu_wr_addr;
-logic signed [DATA_W-1:0]    relu_wr_data [SA_SIZE];
+logic [DATA_W-1:0]    relu_wr_data [SA_SIZE];
 
 // ── relu_buffer ───────────────────────────────────────────────
 logic [$clog2(SA_SIZE)-1:0]  relu_rd_addr;
-logic signed [DATA_W-1:0]    relu_rd_data [SA_SIZE];
+logic [DATA_W-1:0]    relu_rd_data [SA_SIZE];
 
 // ── store_engine ──────────────────────────────────────────────
 logic        st_start;
 logic        st_done;
 logic        st_buf_sel;
 logic [SRAM_AW-1:0]  st_tile_addr;
-logic        st_sram_we0;
+logic [SRAM_BE_W-1:0] st_sram_we0;
 logic        st_sram_en0;
 logic [SRAM_AW-1:0]      st_sram_a0;
 logic [DATA_W_PATH-1:0]  st_sram_di0;
@@ -225,13 +231,7 @@ logic [DATA_W_PATH-1:0] psum_out   [SA_SIZE];
 // IMEM connections
 assign inst_di0      = imem_wr_data;
 assign inst_data     = inst_do0;
-assign inst_we0      = imem_wr_we;
-
-// SRAM port 0: CU drives enable/address during normal operation
-// sram_we0 mux: host > store > CU (CU never writes port 0 directly)
-assign sram_we0 = select_apb_npu ? dmem_wr_be  :
-                  st_sram_en0    ? st_sram_we0 : cu_sram_we0;
-assign sram_en0 = cu_sram_en0;
+assign inst_we0 = load_imem ? imem_wr_we : 4'b0000;
 
 // SRAM port 1: CU owns entirely (read-only for NPU loads)
 assign sram_en1 = cu_sram_en1;
@@ -263,18 +263,15 @@ CU #() cu (
 
     .load_imem        (load_imem),
     .load_dmem        (load_dmem),
+    .dmem_rd_host       (dmem_rd_host),
+
     .imem_rd_wr       (imem_rd_wr),
+    .select_apb_npu      (select_apb_npu),
+    .select_apb_npu_addr (select_apb_npu_addr),
 
     .inst_data        (inst_data),
     .inst_rd_en       (inst_rd_en),
     .PC               (PC),
-
-    .select_apb_npu      (select_apb_npu),
-    .select_apb_npu_addr (select_apb_npu_addr),
-
-    .dmem_wr_be       (dmem_wr_be),
-    .dmem_wr_en       (dmem_wr_en),
-    .dmem_rd_en       (dmem_rd_en),
 
     .sram_en0         (cu_sram_en0),
     .sram_a0          (cu_sram_a0),
@@ -324,12 +321,12 @@ CU #() cu (
     .relu_start       (relu_start),
     .relu_done        (relu_done),
 
+    .addr_st_rel(addr_st_rel),
+
     .st_buf_sel       (st_buf_sel),
     .st_tile_addr     (st_tile_addr),
     .st_start         (st_start),
     .st_done          (st_done),
-    .st_sram_we0      (st_sram_we0),
-    .st_sram_en0      (st_sram_en0),
 
     .done_processing  (done_processing),
     .npu_done         (npu_done)
@@ -344,7 +341,7 @@ mux2x1 #(1) mux_imem_en (
 );
 
 // ── IMEM address mux: host addr (0) vs PC (1) ────────────────
-mux2x1 #(7) mux_imem_addr (
+mux2x1 #(INST_ADDR_W) mux_imem_addr (
     .a   (imem_wr_addr),
     .b   (PC),
     .sel (imem_rd_wr),
@@ -362,7 +359,7 @@ RAM32_ u_inst_mem (
 );
 
 // ── SRAM di0 mux: store_engine (0) vs host (1) ───────────────
-mux2x1 #(32) mux_sram_di0 (
+mux2x1 #(SRAM_DATA_W) mux_sram_di0 (
     .a   (st_sram_di0),
     .b   (dmem_wr_data),
     .sel (select_apb_npu),
@@ -372,13 +369,31 @@ mux2x1 #(32) mux_sram_di0 (
 // ── SRAM address mux (4-way) ──────────────────────────────────
 //   00: store_engine addr   01: host read addr
 //   10: CU addr             11: host write addr
-mux4x1 #(8) mux_sram_addr (
+mux4x1 #(SRAM_ADDR_W) mux_sram_addr (
     .a   (st_sram_a0),
     .b   (dmem_rd_addr),
     .c   (cu_sram_a0),
     .d   (dmem_wr_addr),
     .sel (select_apb_npu_addr),
     .y   (sram_a0)
+);
+
+mux4x1 #(1) mux_sram_en (
+    .a   (st_sram_en0),
+    .b   (dmem_rd_en),
+    .c   (cu_sram_en0),
+    .d   (dmem_wr_en),
+    .sel (select_apb_npu_addr),
+    .y   (sram_en0)
+);
+
+mux4x1 #(4) mux_sram_wr (
+    .a   (st_sram_we0),
+    .b   (4'b0000),
+    .c   (4'b0000),
+    .d   (dmem_wr_be),
+    .sel (select_apb_npu_addr),
+    .y   (sram_we0)
 );
 
 // ── Data SRAM (dual-port: 1RW + 1R) ──────────────────────────
@@ -535,7 +550,7 @@ relu_unit #(SA_SIZE, DATA_W) u_relu (
     .start        (relu_start),
     .done         (relu_done),
     .busy         (),
-    .preq_rd_addr (preq_rd_addr),
+    .preq_rd_addr (preq_rd_addr_rel),
     .preq_rd_data (preq_rd_data),
     .relu_wr_en   (relu_wr_en),
     .relu_wr_addr (relu_wr_addr),
@@ -553,6 +568,13 @@ relu_buffer #(SA_SIZE, DATA_W) u_relu_buf (
     .rd_data (relu_rd_data)
 );
 
+mux2x1 #($clog2(SA_SIZE)) mux_to_rd_addr (
+.a(preq_rd_addr_rel),
+.b(preq_rd_addr_st),
+.sel(addr_st_rel),
+.y(preq_rd_addr)
+);
+
 // ── Store Engine (buffer → SRAM) ─────────────────────────────
 // Reads selected buffer (preq or relu), packs 8×INT8 into 2×32-bit
 // words, and writes back to SRAM port 0 (via mux in npu_top)
@@ -564,7 +586,7 @@ store_engine #(SA_SIZE, DATA_W, SRAM_AW) u_store (
     .busy         (),
     .buf_sel      (st_buf_sel),     // 0=preq_buf, 1=relu_buf
     .base_addr    (st_tile_addr),   // SRAM base address from instruction
-    .preq_rd_addr (preq_rd_addr),
+    .preq_rd_addr (preq_rd_addr_st),
     .preq_rd_data (preq_rd_data),
     .relu_rd_addr (relu_rd_addr),
     .relu_rd_data (relu_rd_data),

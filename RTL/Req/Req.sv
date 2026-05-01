@@ -46,12 +46,12 @@ module req_unit #(
 
     // ── pbias_buffer read port ────────────────────────────────
     output logic [$clog2(SA_SIZE)-1:0]  pb_rd_addr,
-    input  logic signed [31:0]          pb_rd_data [SA_SIZE],
+    input  logic [31:0]          pb_rd_data [SA_SIZE],
 
     // ── preq_buffer write port (REQ owns this) ────────────────
     output logic                        preq_wr_en,
     output logic [$clog2(SA_SIZE)-1:0]  preq_wr_addr,
-    output logic signed [7:0]           preq_wr_data [SA_SIZE]
+    output logic [7:0]           preq_wr_data [SA_SIZE]
 );
 
 // ── Internal ──────────────────────────────────────────────────
@@ -90,32 +90,44 @@ end
 assign pb_rd_addr = row_cnt;
 
 // ── 8 parallel Req datapaths ──────────────────────────────────
-// All combinational; result registered one cycle after start
 genvar col;
 generate
     for (col = 0; col < SA_SIZE; col++) begin : REQ_COL
 
-        logic signed [B_WIDTH+32:0] mul_result;
-        logic signed [B_WIDTH+32:0] shifted;
-        logic signed [7:0]          clipped;
+        // We use 64 bits to safely hold INT32 * INT32
+        logic signed [63:0] mul_result;  
+        logic signed [63:0] shifted;     
+        logic        [7:0]  clipped;
 
-        // Multiply: INT32 × UINT32
-        assign mul_result = pb_rd_data[col] * $signed({1'b0, b});
+        // Multiply: INT32 × INT32 (We must treat b as signed INT32)
+        assign mul_result = $signed(pb_rd_data[col]) * $signed(b);
 
-        // Arithmetic right shift by n_scale
+        // Arithmetic right shift
         assign shifted = mul_result >>> c;
 
-        // Saturate to INT8
+        // Saturate to INT8 using explicit bit slicing
+        // This completely avoids the Verilog signed comparison trap
         always_comb begin
-            if      (shifted > 64'sh000000000000007F)
-                clipped = 8'sh7F;
-            else if (shifted < 64'shFFFFFFFFFFFFFF80)
-                clipped = 8'sh80;
-            else
-                clipped = shifted[7:0];
+            // Check the sign bit (bit 63)
+            if (shifted[63] == 1'b0) begin 
+                // Positive Number: Check if any bits above bit 6 are 1. 
+                // If so, it's > 127.
+                if (|shifted[62:7]) 
+                    clipped = 8'sh7F;
+                else 
+                    clipped = shifted[7:0];
+            end 
+            else begin
+                // Negative Number: Check if any bits above bit 7 are 0. 
+                // If so, it's < -128.
+                if (~&shifted[62:7]) 
+                    clipped = 8'sh80;
+                else 
+                    clipped = shifted[7:0];
+            end
         end
 
-        // Register output — aligns with preq_wr_en below
+        // Register output
         always_ff @(posedge clk or negedge rst_n) begin
             if (!rst_n) preq_wr_data[col] <= 8'sh00;
             else        preq_wr_data[col] <= clipped;
