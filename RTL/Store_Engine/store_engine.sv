@@ -54,11 +54,11 @@ module store_engine #(
 
     // ── preq_buffer read port ─────────────────────────────────
     output logic [$clog2(SA_SIZE)-1:0]   preq_rd_addr,
-    input  logic signed [DATA_WIDTH-1:0] preq_rd_data [SA_SIZE],
+    input  var logic  [DATA_WIDTH-1:0] preq_rd_data [SA_SIZE],
 
     // ── relu_buffer read port ─────────────────────────────────
     output logic [$clog2(SA_SIZE)-1:0]   relu_rd_addr,
-    input  logic signed [DATA_WIDTH-1:0] relu_rd_data [SA_SIZE],
+    input  var logic  [DATA_WIDTH-1:0] relu_rd_data [SA_SIZE],
 
     // ── SRAM port 0 write signals (to mux in npu_top) ─────────
     output logic [3:0]        st_sram_we0,
@@ -121,7 +121,7 @@ assign preq_rd_addr = row_cnt;
 assign relu_rd_addr = row_cnt;
 
 // ── Selected row data ─────────────────────────────────────────
-logic signed [DATA_WIDTH-1:0] sel_row [SA_SIZE];
+logic  [DATA_WIDTH-1:0] sel_row [SA_SIZE];
 
 always_comb begin
     if (buf_sel)
@@ -131,7 +131,7 @@ always_comb begin
 end
 
 // ── Latch row when read is issued ─────────────────────────────
-logic signed [DATA_WIDTH-1:0] row_latch [SA_SIZE];
+logic [DATA_WIDTH-1:0] row_latch [SA_SIZE];
 
 always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n)

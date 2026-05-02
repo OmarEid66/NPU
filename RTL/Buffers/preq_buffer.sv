@@ -21,15 +21,15 @@ module preq_buffer #(
     // ── Write Port (owned by req_unit) ────────────────────────
     input  logic                              wr_en,
     input  logic [$clog2(SA_SIZE)-1:0]        wr_addr,
-    input  logic signed [7:0]                 wr_data [SA_SIZE],
+    input  var logic [7:0]             wr_data [SA_SIZE],
 
     // ── Read Port (to ReLU unit) ──────────────────────────────
     input  logic [$clog2(SA_SIZE)-1:0]        rd_addr,
-    output logic signed [7:0]                 rd_data [SA_SIZE]
+    output logic [7:0]                 rd_data [SA_SIZE]
 );
 
 // ── Storage: 8 rows × 8 cols × INT8 ──────────────────────────
-logic signed [7:0] mem [SA_SIZE][SA_SIZE];
+logic [7:0] mem [SA_SIZE][SA_SIZE];
 
 // ── Write ─────────────────────────────────────────────────────
 always_ff @(posedge clk) begin

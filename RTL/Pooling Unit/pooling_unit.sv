@@ -8,7 +8,7 @@ module pooling_unit
 )
 (
     input  logic clk,arstn,en,
-    input  logic [DATA_WIDTH-1:0] in [0:no_rows * no_cols-1], 
+    input  var logic [DATA_WIDTH-1:0] in [0:no_rows * no_cols-1],
     output logic [DATA_WIDTH+1:0] out [0:((no_cols-1) * (no_rows-1))-1],
     output logic done
 );

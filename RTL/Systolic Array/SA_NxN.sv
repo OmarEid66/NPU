@@ -48,8 +48,8 @@ module SA_NxN #(
     input  logic                    clk,
     input  logic                    rst_n,
 
-    input  logic [DATA_W-1:0]       act_in    [N_SIZE],   // activation row fed into the left edge
-    input  logic [DATA_W-1:0]       weight_in [N_SIZE],   // weight bus: column (normal) or row (transpose)
+    input  var logic [DATA_W-1:0]   act_in    [N_SIZE],   // activation row fed into the left edge
+    input  var logic [DATA_W-1:0]   weight_in [N_SIZE],   // weight bus: column (normal) or row (transpose)
     input  logic                    load_w,               // 1 = weight-load phase, 0 = accumulate phase
     input  logic                    transpose_en,         // 0 = weights enter from bottom, 1 = from right
 

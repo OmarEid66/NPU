@@ -23,7 +23,7 @@ module pbias_buffer #(
     // ── Write Port (from bias_adder) ──────────────────────────
     input  logic                              wr_en,
     input  logic [$clog2(SA_SIZE)-1:0]        wr_addr,
-    input  logic [DATA_W_OUT-1:0]             wr_data [SA_SIZE],
+    input  var logic [DATA_W_OUT-1:0]         wr_data [SA_SIZE],
 
     // ── Read Port (to REQ unit) ───────────────────────────────
     input  logic [$clog2(SA_SIZE)-1:0]        rd_addr,

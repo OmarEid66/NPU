@@ -27,21 +27,19 @@ module CU #(
     // ── Host memory load controls ─────────────────────────────
     input  logic load_imem,
     input  logic load_dmem,
+    input  logic dmem_rd_host,
 
     // ── IMEM / SRAM mux controls ──────────────────────────────
     output logic        imem_rd_wr,
     output logic        select_apb_npu,
     output logic [1:0]  select_apb_npu_addr,
 
-    // ── Host SRAM signals (for mux decisions only) ────────────
-    input  logic [3:0]  dmem_wr_be,
-    input  logic        dmem_wr_en,
-    input  logic        dmem_rd_en,
-
     // ── Instruction memory ────────────────────────────────────
     input  logic [INST_DATA_W-1:0] inst_data,
     output logic                   inst_rd_en,
     output logic [INST_ADDR_W-1:0] PC,
+
+
 
     // ── SRAM Port 0 ───────────────────────────────────────────
     output logic        sram_en0,
@@ -103,13 +101,13 @@ module CU #(
     output logic relu_start,
     input  logic relu_done,
 
+    output logic addr_st_rel,
+
     // ── store_engine ──────────────────────────────────────────
     output logic       st_start,
     input  logic       st_done,
     output logic       st_buf_sel,
-    output logic [7:0] st_tile_addr,
-    output logic       st_sram_we0,   // tied 0, store_engine drives directly
-    output logic       st_sram_en0,   // tied 0, store_engine drives directly
+    output logic [7:0] st_tile_addr, 
 
     // ── Status ────────────────────────────────────────────────
     output logic done_processing,
@@ -125,6 +123,7 @@ localparam CONV         = 6'b000100;
 localparam ADD_BIAS     = 6'b000101;
 localparam REQ_OP       = 6'b000110;
 localparam RELU_OP      = 6'b000111;
+localparam POOL         = 6'b001000;
 localparam STORE_OP     = 6'b001001;
 localparam LOAD_ACT_WGT = 6'b010000;
 localparam NOP          = 6'b111110;
@@ -132,29 +131,6 @@ localparam HALT         = 6'b111111;
 
 localparam CV_CNT_W = $clog2(SA_SIZE) + 1;
 localparam N_ROW_PP = $clog2(SA_SIZE);
-
-// ── Instruction register & decode ────────────────────────────
-logic [INST_DATA_W-1:0] instr_r;
-logic [5:0] opcode;
-logic [3:0] buf_sel;
-logic [7:0] tile_addr_b, tile_addr_a;
-logic       w_transpose;
-logic [4:0] n_scale_dec;
-logic       bypass_bias;
-logic [4:0] ld_cnt;
-logic [7:0] ld_base_r_a, ld_base_r_b;
-logic       ld_active;
-logic is_load_act, is_load_wgt, is_load_a_w, is_load_bias, is_load_scl, is_load_any;
-logic       wr_pend_r;
-logic [4:0] wr_addr_r;
-logic [7:0] st_tile_addr_r;
-logic       st_buf_sel_r;
-logic [$clog2(SA_SIZE)-1:0] acc_wr_cnt;
-logic [CV_CNT_W-1:0] conv_cnt;
-logic conv_cnt_en, conv_cnt_rst;
-logic exec_pulse;
-logic [$clog2(SA_SIZE)-1:0] relu_cnt;
-logic unit_done;
 
 // ── Main FSM ──────────────────────────────────────────────────
 typedef enum logic [2:0] {
@@ -167,8 +143,6 @@ typedef enum logic [2:0] {
     HALTED  = 3'd6
 } state_t;
 
-state_t state, next_state;
-
 // ── CONV sub-phase ────────────────────────────────────────────
 typedef enum logic [2:0] {
     CP_IDLE   = 3'd0,
@@ -178,8 +152,6 @@ typedef enum logic [2:0] {
     CP_WAIT   = 3'd4
 } conv_phase_t;
 
-conv_phase_t conv_phase, next_conv_phase;
-
 // ── RELU sub-phase ────────────────────────────────────────────
 typedef enum logic [1:0] {
     RP_IDLE  = 2'd0,
@@ -187,16 +159,52 @@ typedef enum logic [1:0] {
     RP_WAIT  = 2'd2
 } relu_phase_t;
 
+// ── Instruction register & decode ────────────────────────────
+logic [INST_DATA_W-1:0] instr_r;
+
+// LOAD/STORE Instructions
+logic [5:0] opcode;
+logic [3:0] buf_sel;
+logic [7:0] ext_Addr ;
+logic [7:0] tile_addr_b, tile_addr_a;
+
+// Computation Instructions
+logic       w_transpose;
+logic [4:0] n_scale_dec;
+logic       bypass_bias;
+
+logic [4:0] ld_cnt;
+logic [7:0] ld_base_r_a, ld_base_r_b;
+logic       ld_active;
+logic is_load_act, is_load_wgt, is_load_a_w, is_load_bias, is_load_scl, is_load_any;
+
+logic       wr_pend_r;
+logic [4:0] wr_addr_r;
+logic [7:0] st_tile_addr_r;
+logic       st_buf_sel_r;
+logic [$clog2(SA_SIZE)-1:0] acc_wr_cnt;
+
+logic [CV_CNT_W-1:0] conv_cnt;
+logic conv_cnt_en, conv_cnt_rst;
+
+logic exec_pulse;
+logic [$clog2(SA_SIZE)-1:0] relu_cnt;
+logic unit_done;
+logic st_active;
+
+state_t state, next_state;
+conv_phase_t conv_phase, next_conv_phase;
 relu_phase_t relu_phase, next_relu_phase;
 
 always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n)              instr_r <= '0;
-    else if (state == FETCH) instr_r <= inst_data;
+    else if (state == STALL) instr_r <= inst_data;
 end
 
 always_comb begin
     opcode      = instr_r[31:26];
     buf_sel     = instr_r[25:22];
+    ext_Addr    = instr_r[21:16];
     tile_addr_b = instr_r[15:8];
     tile_addr_a = instr_r[7:0];
     w_transpose = instr_r[6];
@@ -207,8 +215,13 @@ end
 assign n_scale = n_scale_dec;
 
 
-// ── exec_pulse: 1-cycle HIGH on first cycle of EXECUTE ────────
-assign exec_pulse = (state == DECODE);  // registered → HIGH on EXECUTE cycle 0
+// ── exec_pulse: 1-cycle HIGH on FIRST cycle of EXECUTE ────────
+// Registered: state==DECODE is sampled at posedge → output is HIGH
+// exactly when state transitions to EXECUTE the following cycle.
+always_ff @(posedge clk or negedge rst_n) begin
+    if (!rst_n) exec_pulse <= 1'b0;
+    else        exec_pulse <= (state == DECODE);
+end
 
 
 always_comb begin
@@ -262,26 +275,33 @@ end
 // ── Static outputs ────────────────────────────────────────────
 assign inst_rd_en     = (state == FETCH);
 assign npu_done       = (state == HALTED);
-assign done_processing = (state == HALTED);
+
+// Assert done_processing when the PC reaches the end of IMEM (31) 
+// AND the final instruction has finished executing (state moves to NEXT).
+// This acts as an interrupt to the Host CPU to load the next 32 instructions.
+always_ff @(posedge clk or negedge rst_n) begin
+    if (!rst_n)
+        done_processing <= 1'b0;
+    else if (state == NEXT && PC == 5'd31) // 5'd31 is the max address of a 32-word IMEM
+        done_processing <= 1'b1;
+    else if (start || load_imem) // Clear the flag when the host starts a new run or loads new instructions
+        done_processing <= 1'b0;
+end
 
 // ── IMEM / SRAM mux controls ──────────────────────────────────
 assign imem_rd_wr      = ~load_imem;    // 0=host writes, 1=CU reads
 assign select_apb_npu  = load_dmem;     // 1=host drives sram_di0
 
 always_comb begin
-    if (load_dmem && dmem_wr_en)
+    if (load_dmem)
         select_apb_npu_addr = 2'b11;    // host write addr
-    else if (dmem_rd_en)
+    else if (dmem_rd_host)
         select_apb_npu_addr = 2'b01;    // host read addr
-    else if (st_sram_en0)
+    else if (st_active)
         select_apb_npu_addr = 2'b00;    // store engine addr
     else
         select_apb_npu_addr = 2'b10;    // CU addr
 end
-
-// store_engine drives its own we0/en0 directly in npu_top
-assign st_sram_we0 = 1'b0;
-assign st_sram_en0 = 1'b0;
 
 // ================================================================
 //  LOAD Engine
@@ -472,9 +492,45 @@ assign bacc_addr  = acc_wr_cnt;
 assign ba_start = exec_pulse && (opcode == ADD_BIAS);
 
 // ================================================================
-//  REQ — single-pulse start on EXECUTE entry
+//  REQ — SA_SIZE pulses (one per row) then wait for req_done
 // ================================================================
-assign req_start = exec_pulse && (opcode == REQ_OP);
+typedef enum logic [1:0] {
+    RQ_IDLE  = 2'd0,
+    RQ_PULSE = 2'd1,
+    RQ_WAIT  = 2'd2
+} req_phase_t;
+
+req_phase_t req_phase, next_req_phase;
+logic [$clog2(SA_SIZE)-1:0] req_cnt;
+
+always_ff @(posedge clk or negedge rst_n) begin
+    if (!rst_n) req_phase <= RQ_IDLE;
+    else        req_phase <= next_req_phase;
+end
+
+always_comb begin
+    next_req_phase = req_phase;
+    case (req_phase)
+        RQ_IDLE:  if (opcode == REQ_OP && state == EXECUTE)
+                      next_req_phase = RQ_PULSE;
+        RQ_PULSE: if (req_cnt == $clog2(SA_SIZE)'(SA_SIZE - 1))
+                      next_req_phase = RQ_WAIT;
+        RQ_WAIT:  if (req_done)
+                      next_req_phase = RQ_IDLE;
+        default:  next_req_phase = RQ_IDLE;
+    endcase
+end
+
+always_ff @(posedge clk or negedge rst_n) begin
+    if (!rst_n)
+        req_cnt <= '0;
+    else if (req_phase == RQ_IDLE)
+        req_cnt <= '0;
+    else if (req_phase == RQ_PULSE)
+        req_cnt <= req_cnt + 1'b1;
+end
+
+assign req_start = (req_phase == RQ_PULSE);
 
 // ================================================================
 //  RELU — SA_SIZE pulses then wait
@@ -522,6 +578,17 @@ always_ff @(posedge clk or negedge rst_n) begin
     end
 end
 
+// ── st_active: HIGH from st_start until st_done ───────────────
+// Needed so sram_en0/we0 route store_engine for the full EXECUTE
+// duration, not just during DECODE (which was wrong).
+
+always_ff @(posedge clk or negedge rst_n) begin
+    if (!rst_n)        st_active <= 1'b0;
+    else if (st_start) st_active <= 1'b1;
+    else if (st_done)  st_active <= 1'b0;
+end
+
+assign addr_st_rel = (opcode == STORE_OP);
 assign st_tile_addr = st_tile_addr_r;
 assign st_buf_sel   = st_buf_sel_r;
 assign st_start     = exec_pulse && (opcode == STORE_OP);

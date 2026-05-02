@@ -24,8 +24,7 @@ module acc_buffer #(
     // ── Write Port (from SA via CU) ───────────────────────────
     input  logic                              wr_en,
     input  logic [$clog2(SA_SIZE)-1:0]        wr_addr,          // row index 0-7
-    input  logic [DATA_W_OUT-1:0]             wr_data [SA_SIZE], // one full row (8×INT32)
-
+    input  var logic [DATA_W_OUT-1:0]         wr_data [SA_SIZE], // one full row (8×INT32)
     // ── Read Port (to Bias Adder Unit) ────────────────────────
     input  logic [$clog2(SA_SIZE)-1:0]        rd_addr,           // row index 0-7
     output logic [DATA_W_OUT-1:0]             rd_data [SA_SIZE]  // one full row (8×INT32)

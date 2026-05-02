@@ -39,7 +39,7 @@ module TRSRL #(
     input  logic                    clk,
     input  logic                    rst_n,
 
-    input  logic [DATAWIDTH-1:0]    act_in  [N_SIZE],   // parallel activation input lanes
+    input  var logic [DATAWIDTH-1:0] act_in  [N_SIZE],   // parallel activation input lanes
     output logic [DATAWIDTH-1:0]    act_out [N_SIZE]    // skewed activation output lanes
 );
 

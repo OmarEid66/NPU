@@ -36,12 +36,12 @@ module relu_unit #(
 
     // ── preq_buffer read port ─────────────────────────────────
     output logic [$clog2(SA_SIZE)-1:0]   preq_rd_addr,
-    input  logic signed [DATA_WIDTH-1:0] preq_rd_data [SA_SIZE],
+    input  var logic [DATA_WIDTH-1:0] preq_rd_data [SA_SIZE],
 
     // ── relu_buffer write port ────────────────────────────────
     output logic                         relu_wr_en,
     output logic [$clog2(SA_SIZE)-1:0]   relu_wr_addr,
-    output logic signed [DATA_WIDTH-1:0] relu_wr_data [SA_SIZE]
+    output logic [DATA_WIDTH-1:0] relu_wr_data [SA_SIZE]
 );
 
 localparam ROW_CNT_W = $clog2(SA_SIZE);
@@ -71,7 +71,7 @@ end
 assign preq_rd_addr = rd_row_cnt;
 
 // ── Combinational ReLU ────────────────────────────────────────
-logic signed [DATA_WIDTH-1:0] relu_comb [SA_SIZE];
+logic [DATA_WIDTH-1:0] relu_comb [SA_SIZE];
 
 ReLU #(
     .DATA_WIDTH (DATA_WIDTH),
