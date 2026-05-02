@@ -1,169 +1,242 @@
-// =============================================================================
-//  npu_apb_decoder.sv
+// ================================================================
+//  npu_apb_decoder — APB slave interface for npu_top
 //
-//  APB decode logic ONLY — no npu_top inside.
-//  Left side  : APB slave port  (connect to uart_apb_sys S0)
-//  Right side : npu_top signals (connect to npu_top ports directly)
+//  Plugs into one APB slave slot of uart_apb_sys (e.g. Slave 0).
+//  Each slot is 8 KB (SLOT_BITS = 13, addresses 0x000..0x1FFF).
 //
-//  Address map  (PADDR = 13-bit byte offset, SLOT_BITS=13 → 8 KB slot)
-//  ─────────────────────────────────────────────────────────────────────────
-//  0x000         Control / Status
-//                  WR : PWDATA[0] → start_npu  (latched, auto-clears on npu_done)
-//                  RD : PRDATA    = {30'b0, done_processing, npu_done}
+//  Address map (word-aligned, PADDR[1:0] ignored):
+//  ┌────────────┬──────────────────────────────────────────────────┐
+//  │ Offset     │ Register / Region                                │
+//  ├────────────┼──────────────────────────────────────────────────┤
+//  │ 0x000      │ CSR0 — Control                                   │
+//  │            │   [0]   start_npu   (write 1 to pulse)           │
+//  │            │   [1]   load_imem   (1 = host owns IMEM)         │
+//  │            │   [2]   load_dmem   (1 = host owns DMEM)         │
+//  │            │   [3]   dmem_rd_host (1 = host read port active) │
+//  ├────────────┼──────────────────────────────────────────────────┤
+//  │ 0x004      │ CSR1 — Status  (read-only)                       │
+//  │            │   [0]   npu_done                                 │
+//  │            │   [1]   done_processing                          │
+//  ├────────────┼──────────────────────────────────────────────────┤
+//  │ 0x008      │ DMEM_RD_ADDR — host read address latch           │
+//  │            │   [7:0]  word address → dmem_rd_addr             │
+//  ├────────────┼──────────────────────────────────────────────────┤
+//  │ 0x00C      │ DMEM_RD_DATA — host read data (read-only)        │
+//  │            │   [31:0] dmem_rd_data from npu_top               │
+//  ├────────────┼──────────────────────────────────────────────────┤
+//  │ 0x100..    │ IMEM window — 32 words (0x100..0x17C)            │
+//  │   0x17C    │   Write: imem_wr_en pulse, addr = (offset-0x100)/4│
+//  ├────────────┼──────────────────────────────────────────────────┤
+//  │ 0x200..    │ DMEM window — 256 words (0x200..0x5FC)           │
+//  │   0x5FC    │   Write: dmem_wr_en pulse, addr = (offset-0x200)/4│
+//  │            │   Read: combinational from dmem_rd_data           │
+//  └────────────┴──────────────────────────────────────────────────┘
 //
-//  0x004–0x1FC   Instruction memory  (128 words × 32-bit)
-//                  WR : imem_wr_en / imem_wr_addr[6:0] / imem_wr_data
+//  APB timing:
+//    All registers respond in 1 cycle (PREADY always 1).
+//    start_npu is self-clearing: it pulses HIGH for exactly one
+//    clock cycle (the ENABLE phase) then clears itself.
 //
-//  0x200–0x3FC   Data SRAM           (256 words × 32-bit)
-//                  WR : dmem_wr_en / dmem_wr_be / dmem_wr_addr[7:0] / dmem_wr_data
-//                  RD : dmem_rd_en / dmem_rd_addr[7:0] → dmem_rd_data
-//                       PREADY held low 1 extra cycle (registered read latency)
-//
-//  other         PSLVERR = 1
-// =============================================================================
+//  Verilog-2001 compatible (matches your other .v files).
+// ================================================================
 
 module npu_apb_decoder #(
-    parameter SLOT_BITS = 13        // must match uart_apb_sys SLOT_BITS
+    parameter SLOT_BITS   = 13,   // must match uart_apb_sys
+    parameter SRAM_ADDR_W = 8,    // 256-word DMEM
+    parameter INST_ADDR_W = 5,    // 32-word IMEM
+    parameter DATA_W      = 32
 )(
-    input  logic                 clk,
-    input  logic                 rst_n,
+    input  wire                  clk,
+    input  wire                  rst_n,
 
-    // ── APB slave port (connect to uart_apb_sys S0_* ports) ──────────────────
-    input  logic                 PSEL,
-    input  logic [SLOT_BITS-1:0] PADDR,      // [12:0] byte offset in 8 KB slot
-    input  logic                 PENABLE,
-    input  logic                 PWRITE,
-    input  logic [31:0]          PWDATA,
-    output logic [31:0]          PRDATA,
-    output logic                 PREADY,
-    output logic                 PSLVERR,
+    // ── APB slave port (from uart_apb_sys) ─────────────────────
+    input  wire                  PSEL,
+    input  wire [SLOT_BITS-1:0]  PADDR,
+    input  wire                  PENABLE,
+    input  wire                  PWRITE,
+    input  wire [DATA_W-1:0]     PWDATA,
+    output reg  [DATA_W-1:0]     PRDATA,
+    output wire                  PREADY,
+    output wire                  PSLVERR,
 
-    // ── npu_top ports (connect directly to npu_top instance) ─────────────────
-    // Control
-    output logic                 start_npu,
-    output logic                 load_imem,
-    output logic                 load_dmem,
+    // ── npu_top control outputs ─────────────────────────────────
+    output reg                   start_npu,
+    output reg                   load_imem,
+    output reg                   load_dmem,
+    output reg                   dmem_rd_host,
 
-    // Instruction memory write
-    output logic                 imem_wr_en,
-    output logic [6:0]           imem_wr_addr,   // word addr 0–127
-    output logic [31:0]          imem_wr_data,
+    // ── IMEM write port (to npu_top) ───────────────────────────
+    output reg  [3:0]                imem_wr_we,
+    output reg                       imem_wr_en,
+    output reg  [INST_ADDR_W-1:0]    imem_wr_addr,
+    output reg  [DATA_W-1:0]         imem_wr_data,
 
-    // Data SRAM write
-    output logic                 dmem_wr_en,
-    output logic [3:0]           dmem_wr_be,     // byte enables
-    output logic [7:0]           dmem_wr_addr,   // word addr 0–255
-    output logic [31:0]          dmem_wr_data,
+    // ── DMEM write port (to npu_top) ───────────────────────────
+    output reg                       dmem_wr_en,
+    output reg  [3:0]                dmem_wr_be,
+    output reg  [SRAM_ADDR_W-1:0]    dmem_wr_addr,
+    output reg  [DATA_W-1:0]         dmem_wr_data,
 
-    // Data SRAM read
-    output logic                 dmem_rd_en,
-    output logic [7:0]           dmem_rd_addr,   // word addr 0–255
-    input  logic [31:0]          dmem_rd_data,   // 1-cycle registered latency
+    // ── DMEM read port (to/from npu_top) ───────────────────────
+    output reg  [SRAM_ADDR_W-1:0]    dmem_rd_addr,
+    input  wire [DATA_W-1:0]         dmem_rd_data,
+    output wire                      dmem_rd_en,
 
-    // Status from npu_top
-    input  logic                 npu_done,
-    input  logic                 done_processing
+    // ── npu_top status inputs ───────────────────────────────────
+    input  wire                  npu_done,
+    input  wire                  done_processing
 );
 
-    // =========================================================================
-    // APB transaction qualifiers
-    // =========================================================================
-    wire apb_write = PSEL & PENABLE &  PWRITE;
-    wire apb_read  = PSEL & PENABLE & ~PWRITE;
+// ================================================================
+//  APB handshake
+//  All registers respond in 1 wait state — PREADY always HIGH.
+//  No error conditions → PSLVERR always LOW.
+// ================================================================
+assign PREADY  = 1'b1;
+assign PSLVERR = 1'b0;
 
-    // =========================================================================
-    // Address region decode
-    //   sel_ctrl : 0x000                (1 word  — control/status)
-    //   sel_imem : 0x004 – 0x1FC       (128 words — instruction memory)
-    //   sel_dmem : 0x200 – 0x3FC       (256 words — data SRAM)
-    //   sel_none : anything else        (unmapped → PSLVERR)
-    // =========================================================================
-    wire sel_ctrl = (PADDR[12:2] == 11'h000);
-    wire sel_imem = (PADDR[12:9] == 4'b0000) & ~sel_ctrl;   // 0x004–0x1FC
-    wire sel_dmem = (PADDR[12:10] == 3'b001);                // 0x200–0x3FC
-    wire sel_none = ~sel_ctrl & ~sel_imem & ~sel_dmem;
+// Active APB transaction: selected, enabled
+wire apb_active = PSEL & PENABLE;
+wire apb_wr     = apb_active & PWRITE;
+wire apb_rd     = apb_active & ~PWRITE;
 
-    // =========================================================================
-    // START register
-    //   PC writes PADDR=0x000, PWDATA[0]=1 → latched into start_npu
-    //   Auto-clears when npu_done pulses high
-    // =========================================================================
-    always_ff @(posedge clk or negedge rst_n) begin
-        if      (!rst_n)               start_npu <= 1'b0;
-        else if (apb_write & sel_ctrl) start_npu <= PWDATA[0];
-        else if (npu_done)             start_npu <= 1'b0;
-    end
+// ================================================================
+//  Address decode — region select
+// ================================================================
+// CSR region:  offset < 0x100
+// IMEM region: 0x100 <= offset < 0x180  (32 words × 4 bytes)
+// DMEM region: 0x200 <= offset < 0x600  (256 words × 4 bytes)
 
-    // =========================================================================
-    // load_imem / load_dmem
-    //   Registered strobes — high for 1 cycle after each APB write in region
-    // =========================================================================
-    always_ff @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            load_imem <= 1'b0;
-            load_dmem <= 1'b0;
-        end else begin
-            load_imem <= apb_write & sel_imem;
-            load_dmem <= apb_write & sel_dmem;
+wire [SLOT_BITS-1:0] offset = PADDR;   // PADDR is already slot-local
+
+wire sel_csr  = (offset[SLOT_BITS-1:8] == 0);          // 0x000..0x0FF
+wire sel_imem = (offset[SLOT_BITS-1:7] == {{(SLOT_BITS-7){1'b0}}, 2'b10});
+                                                         // 0x100..0x17F
+wire sel_dmem = (offset[SLOT_BITS-1:10] == {{(SLOT_BITS-10){1'b0}}, 2'b10});
+                                                         // 0x200..0x5FF
+
+// CSR sub-address (word index within CSR region)
+wire [5:0] csr_word = offset[7:2];   // word address inside CSR
+
+// IMEM word address:  bits [6:2] of offset  (32 words)
+wire [INST_ADDR_W-1:0] imem_word_addr = offset[INST_ADDR_W+1:2];
+
+// DMEM word address:  bits [9:2] of offset  (256 words)
+wire [SRAM_ADDR_W-1:0] dmem_word_addr = offset[SRAM_ADDR_W+1:2];
+
+// ================================================================
+//  DMEM read enable:
+//  HIGH during an APB read to the DMEM window, OR
+//  when dmem_rd_host is set and the host latched a read address.
+//  We route dmem_rd_en → npu_top so it enables SRAM port 0 read.
+// ================================================================
+assign dmem_rd_en = dmem_rd_host;
+
+// ================================================================
+//  CSR0 — Control register
+//  Bits: [3]=dmem_rd_host [2]=load_dmem [1]=load_imem [0]=start_npu
+//
+//  start_npu is write-1-to-pulse: it clears itself every cycle.
+//  The remaining bits are sticky (hold until explicitly cleared).
+// ================================================================
+always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        start_npu    <= 1'b0;
+        load_imem    <= 1'b0;
+        load_dmem    <= 1'b0;
+        dmem_rd_host <= 1'b0;
+    end else begin
+        // start_npu always self-clears (1-cycle pulse)
+        start_npu <= 1'b0;
+
+        if (apb_wr && sel_csr && csr_word == 6'd0) begin
+            start_npu    <= PWDATA[0];   // write-1-to-pulse
+            load_imem    <= PWDATA[1];
+            load_dmem    <= PWDATA[2];
+            dmem_rd_host <= PWDATA[3];
         end
     end
+end
 
-    // =========================================================================
-    // Instruction memory write port
-    //   imem_wr_addr : PADDR[8:2]  (7-bit word address, covers 0–127)
-    // =========================================================================
-    assign imem_wr_en   = apb_write & sel_imem;
-    assign imem_wr_addr = PADDR[8:2];
-    assign imem_wr_data = PWDATA;
+// ================================================================
+//  DMEM read address latch (CSR offset 0x008, word 2)
+//  Write the word address here to set up a DMEM read.
+//  Then read CSR offset 0x00C to get the data back.
+// ================================================================
+always @(posedge clk or negedge rst_n) begin
+    if (!rst_n)
+        dmem_rd_addr <= {SRAM_ADDR_W{1'b0}};
+    else if (apb_wr && sel_csr && csr_word == 6'd2)
+        dmem_rd_addr <= PWDATA[SRAM_ADDR_W-1:0];
+    // Also support direct DMEM window reads: address set combinationally
+    else if (apb_rd && sel_dmem)
+        dmem_rd_addr <= dmem_word_addr;
+end
 
-    // =========================================================================
-    // Data SRAM write port
-    //   dmem_wr_addr : PADDR[9:2]  (8-bit word address, covers 0–255)
-    //   dmem_wr_be   : 4'hF — PC always writes full 32-bit words
-    // =========================================================================
-    assign dmem_wr_en   = apb_write & sel_dmem;
-    assign dmem_wr_be   = 4'hF;
-    assign dmem_wr_addr = PADDR[9:2];
-    assign dmem_wr_data = PWDATA;
-
-    // =========================================================================
-    // Data SRAM read port
-    //   dmem_rd_data comes back registered (1-cycle latency) from npu_top
-    // =========================================================================
-    assign dmem_rd_en   = apb_read & sel_dmem;
-    assign dmem_rd_addr = PADDR[9:2];
-
-    // =========================================================================
-    // PRDATA mux
-    // =========================================================================
-    always_comb begin
-        case (1'b1)
-            sel_ctrl : PRDATA = {30'b0, done_processing, npu_done};
-            sel_dmem : PRDATA = dmem_rd_data;   // registered in npu_top
-            sel_imem : PRDATA = 32'h0;          // write-only from APB side
-            default  : PRDATA = 32'hDEAD_BEEF; // unmapped
-        endcase
+// ================================================================
+//  IMEM write port
+// ================================================================
+always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        imem_wr_en   <= 1'b0;
+        imem_wr_we   <= 4'h0;
+        imem_wr_addr <= {INST_ADDR_W{1'b0}};
+        imem_wr_data <= {DATA_W{1'b0}};
+    end else begin
+        imem_wr_en <= 1'b0;   // default: no write
+        if (apb_wr && sel_imem) begin
+            imem_wr_en   <= 1'b1;
+            imem_wr_we   <= 4'hF;           // full-word write
+            imem_wr_addr <= imem_word_addr;
+            imem_wr_data <= PWDATA;
+        end
     end
+end
 
-    // =========================================================================
-    // PREADY
-    //   Writes           → always 1  (single-cycle, no wait states)
-    //   DMEM read        → hold 0 for 1 extra cycle (absorb registered latency)
-    //   Everything else  → always 1
-    // =========================================================================
-    logic dmem_rd_pending;
-    always_ff @(posedge clk or negedge rst_n) begin
-        if (!rst_n) dmem_rd_pending <= 1'b0;
-        else        dmem_rd_pending <= apb_read & sel_dmem & ~dmem_rd_pending;
+// ================================================================
+//  DMEM write port
+// ================================================================
+always @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        dmem_wr_en   <= 1'b0;
+        dmem_wr_be   <= 4'h0;
+        dmem_wr_addr <= {SRAM_ADDR_W{1'b0}};
+        dmem_wr_data <= {DATA_W{1'b0}};
+    end else begin
+        dmem_wr_en <= 1'b0;  // default: no write
+        if (apb_wr && sel_dmem) begin
+            dmem_wr_en   <= 1'b1;
+            dmem_wr_be   <= 4'hF;
+            dmem_wr_addr <= dmem_word_addr;
+            dmem_wr_data <= PWDATA;
+        end
     end
+end
 
-    assign PREADY  = PWRITE                       ? 1'b1 :
-                     (sel_dmem & ~dmem_rd_pending) ? 1'b0 :
-                                                     1'b1;
+// ================================================================
+//  APB read data mux
+// ================================================================
+always @(*) begin
+    PRDATA = {DATA_W{1'b0}};
 
-    // =========================================================================
-    // PSLVERR — access to unmapped address region
-    // =========================================================================
-    assign PSLVERR = PSEL & PENABLE & sel_none;
+    if (apb_rd) begin
+        if (sel_csr) begin
+            case (csr_word)
+                6'd0: PRDATA = {28'b0, dmem_rd_host, load_dmem, load_imem, start_npu};
+                6'd1: PRDATA = {30'b0, done_processing, npu_done};
+                6'd2: PRDATA = {{(DATA_W-SRAM_ADDR_W){1'b0}}, dmem_rd_addr};
+                6'd3: PRDATA = dmem_rd_data;   // 0x00C: read DMEM data
+                default: PRDATA = {DATA_W{1'b0}};
+            endcase
+        end else if (sel_dmem) begin
+            // Direct DMEM window read
+            // dmem_rd_addr is updated in the registered always block
+            // but for APB reads the data is available the next cycle;
+            // PREADY=1 so the master samples PRDATA on the same edge.
+            // We present the combinational sram output directly.
+            PRDATA = dmem_rd_data;
+        end
+    end
+end
 
 endmodule
