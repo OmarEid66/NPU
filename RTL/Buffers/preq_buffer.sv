@@ -21,7 +21,7 @@ module preq_buffer #(
     // ── Write Port (owned by req_unit) ────────────────────────
     input  logic                              wr_en,
     input  logic [$clog2(SA_SIZE)-1:0]        wr_addr,
-    input  logic [7:0]                 wr_data [SA_SIZE],
+    input  var logic [7:0]             wr_data [SA_SIZE],
 
     // ── Read Port (to ReLU unit) ──────────────────────────────
     input  logic [$clog2(SA_SIZE)-1:0]        rd_addr,

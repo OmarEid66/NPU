@@ -46,7 +46,7 @@ module req_unit #(
 
     // ── pbias_buffer read port ────────────────────────────────
     output logic [$clog2(SA_SIZE)-1:0]  pb_rd_addr,
-    input  logic [31:0]          pb_rd_data [SA_SIZE],
+    input  var logic [31:0]          pb_rd_data [SA_SIZE], // FIXED: Added 'var'
 
     // ── preq_buffer write port (REQ owns this) ────────────────
     output logic                        preq_wr_en,
@@ -106,26 +106,10 @@ generate
         assign shifted = mul_result >>> c;
 
         // Saturate to INT8 using explicit bit slicing
-        // This completely avoids the Verilog signed comparison trap
-        always_comb begin
-            // Check the sign bit (bit 63)
-            if (shifted[63] == 1'b0) begin 
-                // Positive Number: Check if any bits above bit 6 are 1. 
-                // If so, it's > 127.
-                if (|shifted[62:7]) 
-                    clipped = 8'sh7F;
-                else 
-                    clipped = shifted[7:0];
-            end 
-            else begin
-                // Negative Number: Check if any bits above bit 7 are 0. 
-                // If so, it's < -128.
-                if (~&shifted[62:7]) 
-                    clipped = 8'sh80;
-                else 
-                    clipped = shifted[7:0];
-            end
-        end
+        // FIXED: Replaced always_comb with continuous assignment to avoid warnings
+        assign clipped = (shifted[63] == 1'b0) ? 
+                         ( (|shifted[62:7])  ? 8'sh7F : shifted[7:0] ) : 
+                         ( (~&shifted[62:7]) ? 8'sh80 : shifted[7:0] );
 
         // Register output
         always_ff @(posedge clk or negedge rst_n) begin

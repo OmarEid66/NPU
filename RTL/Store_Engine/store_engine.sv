@@ -54,11 +54,11 @@ module store_engine #(
 
     // ── preq_buffer read port ─────────────────────────────────
     output logic [$clog2(SA_SIZE)-1:0]   preq_rd_addr,
-    input  logic  [DATA_WIDTH-1:0] preq_rd_data [SA_SIZE],
+    input  var logic  [DATA_WIDTH-1:0] preq_rd_data [SA_SIZE],
 
     // ── relu_buffer read port ─────────────────────────────────
     output logic [$clog2(SA_SIZE)-1:0]   relu_rd_addr,
-    input  logic  [DATA_WIDTH-1:0] relu_rd_data [SA_SIZE],
+    input  var logic  [DATA_WIDTH-1:0] relu_rd_data [SA_SIZE],
 
     // ── SRAM port 0 write signals (to mux in npu_top) ─────────
     output logic [3:0]        st_sram_we0,

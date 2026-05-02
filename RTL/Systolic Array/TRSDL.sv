@@ -42,7 +42,7 @@ module TRSDL #(
     input  logic                    clk,
     input  logic                    rst_n,
 
-    input  logic [DATAWIDTH-1:0]    psum_in  [N_SIZE],  // skewed partial sum inputs
+    input  var logic [DATAWIDTH-1:0] psum_in  [N_SIZE],  // skewed partial sum inputs
     output logic [DATAWIDTH-1:0]    psum_out [N_SIZE]   // de-skewed partial sum outputs
 );
 

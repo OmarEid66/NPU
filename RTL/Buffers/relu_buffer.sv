@@ -23,7 +23,7 @@ module relu_buffer #(
     // ── Write Port (from relu_unit) ───────────────────────────
     input  logic                              wr_en,
     input  logic [$clog2(SA_SIZE)-1:0]        wr_addr,
-    input  logic [DATA_WIDTH-1:0]      wr_data [SA_SIZE],
+    input  var logic [DATA_WIDTH-1:0]  wr_data [SA_SIZE],
 
     // ── Read Port (to Pool unit or STORE engine) ───────────────
     input  logic [$clog2(SA_SIZE)-1:0]        rd_addr,

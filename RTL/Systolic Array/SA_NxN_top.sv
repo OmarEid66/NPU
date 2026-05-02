@@ -52,8 +52,8 @@ module SA_NxN_top #(
     input  logic                    rst_n,
 
     // Data inputs
-    input  logic [DATA_W-1:0]       act_in    [N_SIZE],  // activation rows (drive during FEED_A)
-    input  logic [DATA_W-1:0]       weight_in [N_SIZE],  // weight rows     (drive during LOAD_W)
+    input  var logic [DATA_W-1:0]   act_in    [N_SIZE],  // activation rows (drive during FEED_A)
+    input  var logic [DATA_W-1:0]   weight_in [N_SIZE],  // weight rows     (drive during LOAD_W)
     input  logic                    transpose_en,        // 0 = load from bottom, 1 = load from right
 
     // Handshake

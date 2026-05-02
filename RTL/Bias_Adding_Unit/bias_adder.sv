@@ -38,10 +38,10 @@ module bias_adder #(
 
     // ── acc_buffer read port ──────────────────────────────────
     output logic [$clog2(SA_SIZE)-1:0]  acc_rd_addr,
-    input  logic [DATA_W_OUT-1:0]       acc_rd_data [SA_SIZE],
+    input  var logic [DATA_W_OUT-1:0]   acc_rd_data [SA_SIZE],
 
     // ── bias_buffer read port (broadcast) ────────────────────
-    input  logic [DATA_W_OUT-1:0]       bias_rd_data [SA_SIZE],
+    input  var logic [DATA_W_OUT-1:0]   bias_rd_data [SA_SIZE],
 
     // ── pbias_buffer write port ───────────────────────────────
     output logic                        pb_wr_en,

@@ -36,7 +36,7 @@ module relu_unit #(
 
     // ── preq_buffer read port ─────────────────────────────────
     output logic [$clog2(SA_SIZE)-1:0]   preq_rd_addr,
-    input  logic [DATA_WIDTH-1:0] preq_rd_data [SA_SIZE],
+    input  var logic [DATA_WIDTH-1:0] preq_rd_data [SA_SIZE],
 
     // ── relu_buffer write port ────────────────────────────────
     output logic                         relu_wr_en,

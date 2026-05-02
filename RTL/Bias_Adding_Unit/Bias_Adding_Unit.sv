@@ -38,15 +38,14 @@ module Bias_Adding_Unit #(
     generate
         for (genvar i = 0; i < NUM_CH; i++) begin : bias_addition
 
-            always_comb begin
-                sum_ext[i] = BIAS_WIDTH'(signed'(act_in[i*ACT_WIDTH +: ACT_WIDTH]))
-                           + signed'(bias_in[i*BIAS_WIDTH +: BIAS_WIDTH]);
+            // 1. Calculate sum continuously
+            assign sum_ext[i] = BIAS_WIDTH'(signed'(act_in[i*ACT_WIDTH +: ACT_WIDTH]))
+                              + signed'(bias_in[i*BIAS_WIDTH +: BIAS_WIDTH]);
 
-                if      (sum_ext[i] > SAT_MAX) result[i] = OUT_WIDTH'(SAT_MAX);
-                else if (sum_ext[i] < SAT_MIN) result[i] = OUT_WIDTH'(SAT_MIN);
-                else                           result[i] = OUT_WIDTH'(sum_ext[i]);
-            end
-
+            // 2. Saturate continuously using ternary operators
+            assign result[i] = (sum_ext[i] > SAT_MAX) ? OUT_WIDTH'(SAT_MAX) :
+                               (sum_ext[i] < SAT_MIN) ? OUT_WIDTH'(SAT_MIN) :
+                                                        OUT_WIDTH'(sum_ext[i]);
         end
     endgenerate
 

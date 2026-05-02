@@ -26,7 +26,7 @@ module ReLU #(
     parameter int DATA_WIDTH = 8,
     parameter int ARRAY_SIZE = 8
 )(
-    input  logic [DATA_WIDTH-1:0] in_data  [0:ARRAY_SIZE-1],
+    input  var logic [DATA_WIDTH-1:0] in_data  [0:ARRAY_SIZE-1],
     output logic [DATA_WIDTH-1:0] out_data [0:ARRAY_SIZE-1]
 );
 
