@@ -397,7 +397,7 @@ mux4x1 #(4) mux_sram_wr (
 );
 
 // ── Data SRAM (dual-port: 1RW + 1R) ──────────────────────────
-RAM256x32_1RW1R_ u_data_sram (
+RAM128x32_1RW1R u_data_sram (
     .CLK (clk),
     .WE0 (sram_we0),
     .EN0 (sram_en0),
