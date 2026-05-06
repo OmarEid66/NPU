@@ -1,9 +1,0 @@
-{
-    "nl": "/home/auc/si-sprint26-project-nanonpu/Backend/openlane/runs/synexp/11-synthesis-area-3/npu_project_macro.nl.v",
-    "metrics": {
-        "design__instance__count": 97738,
-        "design__instance__area": 857494.905601,
-        "design__instance_unmapped__count": 0,
-        "synthesis__check_error__count": 0
-    }
-}

@@ -1,0 +1,15 @@
+# OpenLane run outputs
+Backend/openlane/runs/
+
+# logs
+*.log
+
+# reports
+*.rpt
+
+# temporary files
+tmp/
+*.tmp
+
+# libraries generated during runs
+*.lib
