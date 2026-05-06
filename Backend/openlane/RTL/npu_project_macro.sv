@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // =============================================================================
-//  npu_project_macro.sv
+//  npu_project_macro.sv (4x4 SA Version)
 //
 //  Wraps npu_system_top to fit the openframe_project_wrapper project-macro
 //  port convention (identical to project_macro.v port list).
@@ -46,13 +46,13 @@ module npu_project_macro
     parameter logic [31:0] LOCK_ADDR       = 32'hFFFF_FFF0,
     parameter logic [31:0] LOCK_KEY        = 32'hDEAD_10CC,
     parameter int unsigned TIMEOUT_CYCLES  = 32'd5_000_000,
-    parameter int unsigned SA_SIZE         = 8,
+    parameter int unsigned SA_SIZE         = 4,           // FIXED: 4x4 Array
     parameter int unsigned DATA_W          = 8,
     parameter int unsigned DATA_W_PATH     = 32,
     parameter int unsigned INST_ADDR_W     = 5,
     parameter int unsigned INST_DATA_W     = 32,
     parameter int unsigned SRAM_DATA_W     = 32,
-    parameter int unsigned SRAM_ADDR_W     = 8
+    parameter int unsigned SRAM_ADDR_W     = 7            // FIXED: 128 words for 4x4
 )(
 `ifdef USE_POWER_PINS
     inout  logic vccd1,
