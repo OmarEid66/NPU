@@ -1,0 +1,67 @@
+{
+   "creator": "Yosys 0.62 (git sha1 7326bb7d6641500ecb285c291a54a662cb1e76cf, clang++ 21.1.2 -fPIC -O3)",
+   "invocation": "stat -json -liberty /home/auc/si-sprint26-project-nanonpu/Backend/openlane/runs/synexp/tmp/a2335851aeb3433e9d3c76316518755e.lib ",
+   "modules": {
+      "\\npu_project_macro": {
+         "num_wires":         56345,
+         "num_wire_bits":     65952,
+         "num_pub_wires":     404,
+         "num_pub_wire_bits": 9902,
+         "num_ports":         15,
+         "num_port_bits":     231,
+         "num_memories":      0,
+         "num_memory_bits":   0,
+         "num_processes":     0,
+         "num_cells":         64991,
+         "num_submodules":       0,
+         "num_cells_by_type": {
+            "$_ANDNOT_": 17417,
+            "$_AND_": 1369,
+            "$_DFFE_PN0N_": 464,
+            "$_DFFE_PN0P_": 614,
+            "$_DFFE_PP_": 6757,
+            "$_DFF_PN0_": 402,
+            "$_DFF_PN1_": 13,
+            "$_MUX_": 11798,
+            "$_NAND_": 2421,
+            "$_NOR_": 2010,
+            "$_NOT_": 968,
+            "$_ORNOT_": 1023,
+            "$_OR_": 6072,
+            "$_XNOR_": 4108,
+            "$_XOR_": 9555
+         }
+      }
+   },
+      "design": {
+         "num_wires":         56345,
+         "num_wire_bits":     65952,
+         "num_pub_wires":     404,
+         "num_pub_wire_bits": 9902,
+         "num_ports":         15,
+         "num_port_bits":     231,
+         "num_memories":      0,
+         "num_memory_bits":   0,
+         "num_processes":     0,
+         "num_cells":         64991,
+         "num_submodules":       0,
+         "num_cells_by_type": {
+            "$_ANDNOT_": 17417,
+            "$_AND_": 1369,
+            "$_DFFE_PN0N_": 464,
+            "$_DFFE_PN0P_": 614,
+            "$_DFFE_PP_": 6757,
+            "$_DFF_PN0_": 402,
+            "$_DFF_PN1_": 13,
+            "$_MUX_": 11798,
+            "$_NAND_": 2421,
+            "$_NOR_": 2010,
+            "$_NOT_": 968,
+            "$_ORNOT_": 1023,
+            "$_OR_": 6072,
+            "$_XNOR_": 4108,
+            "$_XOR_": 9555
+         }
+      }
+}
+

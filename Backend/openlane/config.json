@@ -27,7 +27,7 @@
     "//": " chip. Changing any of them will break top-level integration.",
     "//": "=================================================================",
 
-    "DESIGN_NAME": "npu_system_top",
+    "DESIGN_NAME": "npu_project_macro",
     "FP_SIZING": "absolute",
     "DIE_AREA": [0, 0, 880, 1031.66],
     "FP_DEF_TEMPLATE": "dir::fixed_dont_change/project_macro.def",

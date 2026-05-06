@@ -109,7 +109,7 @@
     "ENDCAP_CELL": "sky130_fd_sc_hd__decap_3",
     "DESIGN_DIR": "/home/auc/si-sprint26-project-nanonpu/Backend/openlane",
     "PDK_ROOT": "/home/auc/.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71",
-    "DESIGN_NAME": "npu_system_top",
+    "DESIGN_NAME": "npu_project_macro",
     "PDK": "sky130A",
     "CLOCK_PERIOD": 50,
     "CLOCK_PORT": "clk",

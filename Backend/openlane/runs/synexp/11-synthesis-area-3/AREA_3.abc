@@ -1,0 +1,10 @@
+strash
+dch
+map -B 0.9
+topo
+stime -c
+buffer -c -N 10
+upsize -c
+dnsize -c
+stime -p
+print_stats -m
