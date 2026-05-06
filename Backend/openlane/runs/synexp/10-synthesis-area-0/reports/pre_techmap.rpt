@@ -1,0 +1,45 @@
+194. Printing statistics.
+
+=== npu_system_top ===
+
+        +----------Local Count, excluding submodules.
+        | 
+    56328 wires
+    65719 wire bits
+      392 public wires
+     9674 public wire bits
+        7 ports
+        7 port bits
+    64986 cells
+    17420   $_ANDNOT_
+     1372   $_AND_
+      464   $_DFFE_PN0N_
+      614   $_DFFE_PN0P_
+     6757   $_DFFE_PP_
+      402   $_DFF_PN0_
+       13   $_DFF_PN1_
+    11797   $_MUX_
+     2414   $_NAND_
+     2008   $_NOR_
+      965   $_NOT_
+     1028   $_ORNOT_
+     6069   $_OR_
+     4114   $_XNOR_
+     9549   $_XOR_
+
+   Area for cell type $_ANDNOT_ is unknown!
+   Area for cell type $_AND_ is unknown!
+   Area for cell type $_DFFE_PN0N_ is unknown!
+   Area for cell type $_DFFE_PN0P_ is unknown!
+   Area for cell type $_DFFE_PP_ is unknown!
+   Area for cell type $_DFF_PN0_ is unknown!
+   Area for cell type $_DFF_PN1_ is unknown!
+   Area for cell type $_MUX_ is unknown!
+   Area for cell type $_NAND_ is unknown!
+   Area for cell type $_NOR_ is unknown!
+   Area for cell type $_NOT_ is unknown!
+   Area for cell type $_ORNOT_ is unknown!
+   Area for cell type $_OR_ is unknown!
+   Area for cell type $_XNOR_ is unknown!
+   Area for cell type $_XOR_ is unknown!
+
