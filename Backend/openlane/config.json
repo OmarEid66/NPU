@@ -1,0 +1,38 @@
+{
+    "//": "================================================================",
+    "//": " project_macro — config.json",
+    "//": "================================================================",
+
+    "//": "=== USER SECTION — Edit the parameters below for your design ===",
+
+    "//": "--- Verilog source files ---",
+    "//": "Add your own RTL files before project_macro.v.",
+    
+    "VERILOG_FILES": [
+        "dir::rtl/*.v",
+        "dir::../../verilog/rtl/project_macro.v"
+    ],
+
+    "//": "--- Clock period (ns) — set based on your target frequency ---",
+    "CLOCK_PERIOD": 50,
+    
+    "//": "--- Timing constraint files ---",
+    "PNR_SDC_FILE": "dir::pnr.sdc",
+    "SIGNOFF_SDC_FILE": "dir::signoff.sdc",
+
+    "//": "=================================================================",
+    "//": " FIXED SECTION — do NOT edit anything below this line",
+    "//": " These values define the physical contract with the multi-project",
+    "//": " chip. Changing any of them will break top-level integration.",
+    "//": "=================================================================",
+
+    "DESIGN_NAME": "project_macro",
+    "FP_SIZING": "absolute",
+    "DIE_AREA": [0, 0, 880, 1031.66],
+    "FP_DEF_TEMPLATE": "dir::fixed_dont_change/project_macro.def",
+    "VDD_NETS": ["vccd1"],
+    "GND_NETS": ["vssd1"],
+    "CLOCK_PORT": "clk",
+    "RT_MAX_LAYER": "met4",
+    "PDN_MULTILAYER": false
+}
