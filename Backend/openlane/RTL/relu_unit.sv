@@ -9,12 +9,12 @@ module relu_unit #(
     output logic done,
     output logic busy,
 
-    output logic [$clog2(SA_SIZE)-1:0]             preq_rd_addr,
-    input  var logic [SA_SIZE-1:0][DATA_WIDTH-1:0] preq_rd_data,  // FIXED: Added 'var'
+    output logic [$clog2(SA_SIZE)-1:0]         preq_rd_addr,
+    input  var logic [SA_SIZE-1:0][DATA_WIDTH-1:0] preq_rd_data,  
 
-    output logic                                   relu_wr_en,
-    output logic [$clog2(SA_SIZE)-1:0]             relu_wr_addr,
-    output logic [SA_SIZE-1:0][DATA_WIDTH-1:0]     relu_wr_data   
+    output logic                               relu_wr_en,
+    output logic [$clog2(SA_SIZE)-1:0]         relu_wr_addr,
+    output logic [SA_SIZE-1:0][DATA_WIDTH-1:0] relu_wr_data   
 );
 
 localparam ROW_CNT_W = $clog2(SA_SIZE);
@@ -53,7 +53,7 @@ always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
         wr_en_r      <= 1'b0;
         wr_addr_r    <= '0;
-        relu_wr_data <= '{default: '0};
+        relu_wr_data <= '0;      // FIXED: Removed '{default: '0} to satisfy Yosys
     end else begin
         wr_en_r      <= start;
         wr_addr_r    <= rd_row_cnt;

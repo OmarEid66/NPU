@@ -8,9 +8,10 @@
     "//": "--- Verilog source files ---",
     "//": "Add your own RTL files before project_macro.v.",
     
-    "VERILOG_FILES": [
-        "dir::rtl/*.v",
-        "dir::../../verilog/rtl/project_macro.v"
+	"VERILOG_FILES": [
+        "dir::RTL/*.v",
+        "dir::RTL/*.sv",
+        "dir::RTL/*.SV"
     ],
 
     "//": "--- Clock period (ns) — set based on your target frequency ---",
@@ -26,7 +27,7 @@
     "//": " chip. Changing any of them will break top-level integration.",
     "//": "=================================================================",
 
-    "DESIGN_NAME": "project_macro",
+    "DESIGN_NAME": "npu_system_top",
     "FP_SIZING": "absolute",
     "DIE_AREA": [0, 0, 880, 1031.66],
     "FP_DEF_TEMPLATE": "dir::fixed_dont_change/project_macro.def",

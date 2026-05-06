@@ -33,8 +33,8 @@ module store_engine #(
 // ── FSM ───────────────────────────────────────────────────────
 typedef enum logic [1:0] {
     ST_IDLE    = 2'd0,
-    ST_RD      = 2'd1,   // issue buffer read address
-    ST_WR_WORD = 2'd2,   // write packed 32-bit word to SRAM
+    ST_RD      = 2'd1,   
+    ST_WR_WORD = 2'd2,   
     ST_DONE    = 2'd3
 } st_state_t;
 
@@ -46,13 +46,11 @@ logic                        last_row;
 
 assign last_row = (row_cnt == SA_SIZE - 1);
 
-// ── State register ────────────────────────────────────────────
 always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n) state <= ST_IDLE;
     else        state <= next_state;
 end
 
-// ── Next-state logic ──────────────────────────────────────────
 always_comb begin
     next_state = state;
     case (state)
@@ -67,7 +65,6 @@ always_comb begin
     endcase
 end
 
-// ── Row counter ───────────────────────────────────────────────
 always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n)
         row_cnt <= '0;
@@ -77,11 +74,9 @@ always_ff @(posedge clk or negedge rst_n) begin
         row_cnt <= row_cnt + 1'b1;
 end
 
-// ── Buffer read addresses ─────────────────────────────────────
 assign preq_rd_addr = row_cnt;
 assign relu_rd_addr = row_cnt;
 
-// ── Select active buffer (using packed arrays) ────────────────
 logic [SA_SIZE-1:0][DATA_WIDTH-1:0] sel_row;
 
 always_comb begin
@@ -91,27 +86,23 @@ always_comb begin
         sel_row = preq_rd_data;
 end
 
-// ── Latch row on ST_RD (combinational buffer read) ────────────
 logic [SA_SIZE-1:0][DATA_WIDTH-1:0] row_latch;
 
 always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n)
-        row_latch <= '{default: '0};
+        row_latch <= '0;         // FIXED: Removed '{default: '0} to satisfy Yosys
     else if (state == ST_RD)
         row_latch <= sel_row;
 end
 
-// ── Pack 4×INT8 into one 32-bit word ──────────────────────────
 logic [31:0] word_packed;
 assign word_packed = { row_latch[3], row_latch[2],
                        row_latch[1], row_latch[0] };
 
-// ── SRAM word address: base + row (1 word per row) ────────────
 logic [SRAM_AW-1:0] sram_word_addr;
 assign sram_word_addr = base_addr +
                         {{(SRAM_AW-$clog2(SA_SIZE)){1'b0}}, row_cnt};
 
-// ── SRAM port 0 drive ─────────────────────────────────────────
 always_comb begin
     st_sram_we0 = 4'h0;
     st_sram_en0 = 1'b0;
@@ -126,7 +117,6 @@ always_comb begin
     end
 end
 
-// ── Handshake outputs ─────────────────────────────────────────
 assign done = (state == ST_DONE);
 assign busy = (state != ST_IDLE);
 
