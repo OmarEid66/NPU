@@ -90,7 +90,7 @@ logic [SA_SIZE-1:0][DATA_WIDTH-1:0] row_latch;
 
 always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n)
-        row_latch <= '0;         // FIXED: Removed '{default: '0} to satisfy Yosys
+        row_latch <= 0;          // YOSYS FIX: Safely hardcoded to 0
     else if (state == ST_RD)
         row_latch <= sel_row;
 end

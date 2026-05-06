@@ -53,7 +53,7 @@ always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
         wr_en_r      <= 1'b0;
         wr_addr_r    <= '0;
-        relu_wr_data <= '0;      // FIXED: Removed '{default: '0} to satisfy Yosys
+        relu_wr_data <= 0;       // YOSYS FIX: Safely hardcoded to 0
     end else begin
         wr_en_r      <= start;
         wr_addr_r    <= rd_row_cnt;

@@ -21,11 +21,11 @@ module CU #(
     output logic [INST_ADDR_W-1:0] PC,
 
     output logic                   sram_en0,
-    output logic [SRAM_ADDR_W-1:0] sram_a0,        // EXACT MATCH TO SRAM WIDTH
+    output logic [SRAM_ADDR_W-1:0] sram_a0,        
     input  logic [31:0]            sram_do0,
 
     output logic                   sram_en1,
-    output logic [SRAM_ADDR_W-1:0] sram_a1,        // EXACT MATCH TO SRAM WIDTH
+    output logic [SRAM_ADDR_W-1:0] sram_a1,        
     input  logic [31:0]            sram_do1,
 
     output logic        act_wr_en,
@@ -73,7 +73,7 @@ module CU #(
     output logic                   st_start,
     input  logic                   st_done,
     output logic                   st_buf_sel,
-    output logic [SRAM_ADDR_W-1:0] st_tile_addr,    // EXACT MATCH TO SRAM WIDTH
+    output logic [SRAM_ADDR_W-1:0] st_tile_addr,    
 
     output logic done_processing,
     output logic npu_done
@@ -282,7 +282,7 @@ always_comb begin
     sram_a0  = '0;
     if (ld_active && is_load_act && (ld_cnt < SA_SIZE)) begin   
         sram_en0 = 1'b1;
-        sram_a0  = ld_base_r_a + SRAM_ADDR_W'(ld_cnt); 
+        sram_a0  = ld_base_r_a + ld_cnt;  // YOSYS FIX: Removed cast
     end
 end
 
@@ -292,11 +292,11 @@ always_comb begin
     if (ld_active && (ld_cnt < SA_SIZE)) begin                  
         if (is_load_wgt) begin
             sram_en1 = 1'b1;
-            sram_a1  = is_load_a_w ? ld_base_r_b + SRAM_ADDR_W'(ld_cnt)
-                                   : ld_base_r_a + SRAM_ADDR_W'(ld_cnt);
+            sram_a1  = is_load_a_w ? ld_base_r_b + ld_cnt       // YOSYS FIX
+                                   : ld_base_r_a + ld_cnt;      // YOSYS FIX
         end else if (is_load_bias && (ld_cnt < SA_SIZE)) begin  
             sram_en1 = 1'b1;
-            sram_a1  = ld_base_r_a + SRAM_ADDR_W'(ld_cnt);
+            sram_a1  = ld_base_r_a + ld_cnt;                    // YOSYS FIX
         end else if (is_load_scl && (ld_cnt == 5'd0)) begin
             sram_en1 = 1'b1;
             sram_a1  = ld_base_r_a;
@@ -366,7 +366,7 @@ always_comb begin
         CP_START: next_conv_phase = CP_LOAD_W;
         CP_LOAD_W: begin
             conv_cnt_en = 1'b1;
-            if (conv_cnt == CV_CNT_W'(SA_SIZE - 1)) begin
+            if (conv_cnt == (SA_SIZE - 1)) begin // YOSYS FIX: Removed cast
                 conv_cnt_rst    = 1'b1;
                 conv_cnt_en     = 1'b0;
                 next_conv_phase = CP_FEED_A;
@@ -374,7 +374,7 @@ always_comb begin
         end
         CP_FEED_A: begin
             conv_cnt_en = 1'b1;
-            if (conv_cnt == CV_CNT_W'(SA_SIZE - 1)) begin
+            if (conv_cnt == (SA_SIZE - 1)) begin // YOSYS FIX: Removed cast
                 conv_cnt_rst    = 1'b1;
                 conv_cnt_en     = 1'b0;
                 next_conv_phase = CP_WAIT;
@@ -424,7 +424,7 @@ always_comb begin
     case (req_phase)
         RQ_IDLE:  if (opcode == REQ_OP && state == EXECUTE)
                       next_req_phase = RQ_PULSE;
-        RQ_PULSE: if (req_cnt == $clog2(SA_SIZE)'(SA_SIZE - 1))
+        RQ_PULSE: if (req_cnt == (SA_SIZE - 1))  // YOSYS FIX: Removed cast
                       next_req_phase = RQ_WAIT;
         RQ_WAIT:  if (req_done)
                       next_req_phase = RQ_IDLE;
@@ -453,7 +453,7 @@ always_comb begin
     case (relu_phase)
         RP_IDLE:  if (opcode == RELU_OP && state == EXECUTE)
                       next_relu_phase = RP_PULSE;
-        RP_PULSE: if (relu_cnt == $clog2(SA_SIZE)'(SA_SIZE - 1))
+        RP_PULSE: if (relu_cnt == (SA_SIZE - 1))  // YOSYS FIX: Removed cast
                       next_relu_phase = RP_WAIT;
         RP_WAIT:  if (relu_done)
                       next_relu_phase = RP_IDLE;
