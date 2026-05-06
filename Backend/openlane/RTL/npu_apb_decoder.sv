@@ -35,7 +35,7 @@
 
 module npu_apb_decoder #(
     parameter SLOT_BITS   = 13,
-    parameter SRAM_ADDR_W = 7,    
+    parameter SRAM_ADDR_W = 6,    
     parameter INST_ADDR_W = 5,
     parameter DATA_W      = 32
 )(
@@ -86,7 +86,7 @@ wire [SLOT_BITS-1:0] offset = PADDR;
 // FIXED: Cleaned up address decoding to strictly match 0x100 and 0x200
 wire sel_csr  = (offset[SLOT_BITS-1:8] == 'd0);          // 0x000..0x0FF
 wire sel_imem = (offset[SLOT_BITS-1:7] == 'd2);          // 0x100..0x17F (Bit 8 = 1)
-wire sel_dmem = (offset[SLOT_BITS-1:9] == 'd1);          // 0x200..0x3FF (Bit 9 = 1)
+wire sel_dmem = (offset[SLOT_BITS-1:8] == 'd2);          // FIXED: 0x200..0x2FF (64 words / 256 bytes)
 
 wire [5:0] csr_word = offset[7:2];
 wire [INST_ADDR_W-1:0] imem_word_addr = offset[INST_ADDR_W+1:2];

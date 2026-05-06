@@ -29,7 +29,7 @@ module tb_npu_system_4x4;
 // ================================================================
 localparam SA_SIZE    = 4;          
 localparam DATA_W     = 8;
-localparam SRAM_AW    = 7;          // 128-word DMEM
+localparam SRAM_AW    = 6;         
 localparam CLK_PERIOD = 10;
 localparam DIV        = 16'd4;
 localparam BIT_CLKS   = DIV * 16;

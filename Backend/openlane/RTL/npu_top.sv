@@ -5,7 +5,7 @@ module npu_top #(
     parameter INST_ADDR_W = 5,
     parameter INST_DATA_W = 32,
     parameter SRAM_DATA_W = 32,
-    parameter SRAM_ADDR_W = 7       // 128-word DMEM default
+    parameter SRAM_ADDR_W = 6       // 128-word DMEM default
 )(
     input  logic        clk,
     input  logic        rst_n,
@@ -319,7 +319,7 @@ mux4x1 #(4) mux_sram_wr (
     .y   (sram_we0)
 );
 
-RAM128x32_1RW1R u_data_sram (
+RAM64x32_1RW1R u_data_sram (
     .CLK (clk),
     .WE0 (sram_we0),
     .EN0 (sram_en0),

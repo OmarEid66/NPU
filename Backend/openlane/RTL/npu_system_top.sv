@@ -35,7 +35,7 @@ module npu_system_top #(
     parameter INST_ADDR_W     = 5,
     parameter INST_DATA_W     = 32,
     parameter SRAM_DATA_W     = 32,
-    parameter SRAM_ADDR_W     = 7     // ← 8→7: 128-word DMEM
+    parameter SRAM_ADDR_W     = 6    
 )(
     input  wire clk,
     input  wire rst_n,

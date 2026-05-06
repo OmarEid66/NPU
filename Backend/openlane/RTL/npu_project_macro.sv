@@ -52,7 +52,7 @@ module npu_project_macro
     parameter int unsigned INST_ADDR_W     = 5,
     parameter int unsigned INST_DATA_W     = 32,
     parameter int unsigned SRAM_DATA_W     = 32,
-    parameter int unsigned SRAM_ADDR_W     = 7            // FIXED: 128 words for 4x4
+    parameter int unsigned SRAM_ADDR_W     = 6           
 )(
 `ifdef USE_POWER_PINS
     inout  logic vccd1,
