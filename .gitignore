@@ -6,6 +6,7 @@ Backend/openlane/runs/
 
 # reports
 *.rpt
+!Final_Submission_/**/*.rpt
 
 # temporary files
 tmp/
