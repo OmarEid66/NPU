@@ -13,3 +13,6 @@ tmp/
 
 # libraries generated during runs
 *.lib
+Backend/openlane/runs/
+Backend/openlane/synexp/
+Backend/openlane/synexp/
