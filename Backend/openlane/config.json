@@ -1,32 +1,18 @@
 {
-    "//": "================================================================",
-    "//": " project_macro — config.json",
-    "//": "================================================================",
-
-    "//": "=== USER SECTION — Edit the parameters below for your design ===",
-
-    "//": "--- Verilog source files ---",
-    "//": "Add your own RTL files before project_macro.v.",
-    
-	"VERILOG_FILES": [
+    "VERILOG_FILES": [
         "dir::RTL/*.v",
         "dir::RTL/*.sv",
         "dir::RTL/*.SV"
     ],
-
-    "//": "--- Clock period (ns) — set based on your target frequency ---",
     "CLOCK_PERIOD": 50,
-    
-    "//": "--- Timing constraint files ---",
     "PNR_SDC_FILE": "dir::pnr.sdc",
     "SIGNOFF_SDC_FILE": "dir::signoff.sdc",
-
-    "//": "=================================================================",
-    "//": " FIXED SECTION — do NOT edit anything below this line",
-    "//": " These values define the physical contract with the multi-project",
-    "//": " chip. Changing any of them will break top-level integration.",
-    "//": "=================================================================",
-
+    "DEFAULT_CORNER": "nom_ss_100C_1v60",
+    "IO_PIN_ORDER_CFG": "dir::pin_order.cfg",
+    "RUN_POST_CTS_RESIZER_TIMING": false,
+    "RUN_POST_GRT_DESIGN_REPAIR": false,
+    "DESIGN_REPAIR_MAX_SLEW_PCT": 0,
+    "DESIGN_REPAIR_MAX_CAP_PCT": 0,
     "DESIGN_NAME": "npu_project_macro",
     "FP_SIZING": "absolute",
     "DIE_AREA": [0, 0, 880, 1031.66],
@@ -35,5 +21,26 @@
     "GND_NETS": ["vssd1"],
     "CLOCK_PORT": "clk",
     "RT_MAX_LAYER": "met4",
-    "PDN_MULTILAYER": false
+    "SYNTH_STRATEGY": "AREA 2",
+    "PDN_MULTILAYER": false,
+    "GRT_ANTENNA_REPAIR_ITERS": 15,
+    "GRT_ANTENNA_REPAIR_MARGIN": 10,
+    "DIODE_ON_PORTS": "in",
+    "DRT_MAX_ITER": 30,
+
+    "meta": {
+        "flow": "Classic",
+        "substituting_steps": {
+            "+OpenROAD.DetailedRouting": "Odb.InsertECOBuffers",
+            "+Odb.InsertECOBuffers": "OpenROAD.DetailedRouting"
+        }
+    },
+
+    "INSERT_ECO_BUFFERS": [
+	{ "target": "input1/X", "buffer": "sky130_fd_sc_hd__clkdlybuf4s50_1" },
+        { "target": "input1/X", "buffer": "sky130_fd_sc_hd__clkdlybuf4s50_1" },
+        { "target": "input1/X", "buffer": "sky130_fd_sc_hd__clkdlybuf4s50_1" }
+
+   
+    ]
 }
