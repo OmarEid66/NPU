@@ -1,0 +1,2242 @@
+VERSION 5.7 ;
+  NOWIREEXTENSIONATPIN ON ;
+  DIVIDERCHAR "/" ;
+  BUSBITCHARS "[]" ;
+MACRO npu_project_macro
+  CLASS BLOCK ;
+  FOREIGN npu_project_macro ;
+  ORIGIN 0.000 0.000 ;
+  SIZE 880.000 BY 1031.660 ;
+  PIN clk
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    ANTENNAGATEAREA 1.286700 ;
+    ANTENNADIFFAREA 0.434700 ;
+    PORT
+      LAYER met3 ;
+        RECT 0.000 171.400 0.600 172.000 ;
+    END
+  END clk
+  PIN gpio_bot_dm[0]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 38.730 0.000 39.010 0.280 ;
+    END
+  END gpio_bot_dm[0]
+  PIN gpio_bot_dm[10]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 222.270 0.000 222.550 0.280 ;
+    END
+  END gpio_bot_dm[10]
+  PIN gpio_bot_dm[11]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 231.930 0.000 232.210 0.280 ;
+    END
+  END gpio_bot_dm[11]
+  PIN gpio_bot_dm[12]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 270.570 0.000 270.850 0.280 ;
+    END
+  END gpio_bot_dm[12]
+  PIN gpio_bot_dm[13]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 280.230 0.000 280.510 0.280 ;
+    END
+  END gpio_bot_dm[13]
+  PIN gpio_bot_dm[14]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 289.890 0.000 290.170 0.280 ;
+    END
+  END gpio_bot_dm[14]
+  PIN gpio_bot_dm[15]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 328.530 0.000 328.810 0.280 ;
+    END
+  END gpio_bot_dm[15]
+  PIN gpio_bot_dm[16]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 338.190 0.000 338.470 0.280 ;
+    END
+  END gpio_bot_dm[16]
+  PIN gpio_bot_dm[17]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 347.850 0.000 348.130 0.280 ;
+    END
+  END gpio_bot_dm[17]
+  PIN gpio_bot_dm[18]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 386.490 0.000 386.770 0.280 ;
+    END
+  END gpio_bot_dm[18]
+  PIN gpio_bot_dm[19]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 396.150 0.000 396.430 0.280 ;
+    END
+  END gpio_bot_dm[19]
+  PIN gpio_bot_dm[1]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 48.390 0.000 48.670 0.280 ;
+    END
+  END gpio_bot_dm[1]
+  PIN gpio_bot_dm[20]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 405.810 0.000 406.090 0.280 ;
+    END
+  END gpio_bot_dm[20]
+  PIN gpio_bot_dm[21]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 444.450 0.000 444.730 0.280 ;
+    END
+  END gpio_bot_dm[21]
+  PIN gpio_bot_dm[22]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 454.110 0.000 454.390 0.280 ;
+    END
+  END gpio_bot_dm[22]
+  PIN gpio_bot_dm[23]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 463.770 0.000 464.050 0.280 ;
+    END
+  END gpio_bot_dm[23]
+  PIN gpio_bot_dm[24]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 502.410 0.000 502.690 0.280 ;
+    END
+  END gpio_bot_dm[24]
+  PIN gpio_bot_dm[25]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 512.070 0.000 512.350 0.280 ;
+    END
+  END gpio_bot_dm[25]
+  PIN gpio_bot_dm[26]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 521.730 0.000 522.010 0.280 ;
+    END
+  END gpio_bot_dm[26]
+  PIN gpio_bot_dm[27]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 560.370 0.000 560.650 0.280 ;
+    END
+  END gpio_bot_dm[27]
+  PIN gpio_bot_dm[28]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 570.030 0.000 570.310 0.280 ;
+    END
+  END gpio_bot_dm[28]
+  PIN gpio_bot_dm[29]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 579.690 0.000 579.970 0.280 ;
+    END
+  END gpio_bot_dm[29]
+  PIN gpio_bot_dm[2]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 58.050 0.000 58.330 0.280 ;
+    END
+  END gpio_bot_dm[2]
+  PIN gpio_bot_dm[30]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 618.330 0.000 618.610 0.280 ;
+    END
+  END gpio_bot_dm[30]
+  PIN gpio_bot_dm[31]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 627.990 0.000 628.270 0.280 ;
+    END
+  END gpio_bot_dm[31]
+  PIN gpio_bot_dm[32]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 637.650 0.000 637.930 0.280 ;
+    END
+  END gpio_bot_dm[32]
+  PIN gpio_bot_dm[33]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 676.290 0.000 676.570 0.280 ;
+    END
+  END gpio_bot_dm[33]
+  PIN gpio_bot_dm[34]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 685.950 0.000 686.230 0.280 ;
+    END
+  END gpio_bot_dm[34]
+  PIN gpio_bot_dm[35]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 695.610 0.000 695.890 0.280 ;
+    END
+  END gpio_bot_dm[35]
+  PIN gpio_bot_dm[36]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 734.250 0.000 734.530 0.280 ;
+    END
+  END gpio_bot_dm[36]
+  PIN gpio_bot_dm[37]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 743.910 0.000 744.190 0.280 ;
+    END
+  END gpio_bot_dm[37]
+  PIN gpio_bot_dm[38]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 753.570 0.000 753.850 0.280 ;
+    END
+  END gpio_bot_dm[38]
+  PIN gpio_bot_dm[39]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 792.210 0.000 792.490 0.280 ;
+    END
+  END gpio_bot_dm[39]
+  PIN gpio_bot_dm[3]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 96.690 0.000 96.970 0.280 ;
+    END
+  END gpio_bot_dm[3]
+  PIN gpio_bot_dm[40]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 801.870 0.000 802.150 0.280 ;
+    END
+  END gpio_bot_dm[40]
+  PIN gpio_bot_dm[41]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 811.530 0.000 811.810 0.280 ;
+    END
+  END gpio_bot_dm[41]
+  PIN gpio_bot_dm[42]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 850.170 0.000 850.450 0.280 ;
+    END
+  END gpio_bot_dm[42]
+  PIN gpio_bot_dm[43]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 859.830 0.000 860.110 0.280 ;
+    END
+  END gpio_bot_dm[43]
+  PIN gpio_bot_dm[44]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 869.490 0.000 869.770 0.280 ;
+    END
+  END gpio_bot_dm[44]
+  PIN gpio_bot_dm[4]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 106.350 0.000 106.630 0.280 ;
+    END
+  END gpio_bot_dm[4]
+  PIN gpio_bot_dm[5]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 116.010 0.000 116.290 0.280 ;
+    END
+  END gpio_bot_dm[5]
+  PIN gpio_bot_dm[6]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 154.650 0.000 154.930 0.280 ;
+    END
+  END gpio_bot_dm[6]
+  PIN gpio_bot_dm[7]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 164.310 0.000 164.590 0.280 ;
+    END
+  END gpio_bot_dm[7]
+  PIN gpio_bot_dm[8]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 173.970 0.000 174.250 0.280 ;
+    END
+  END gpio_bot_dm[8]
+  PIN gpio_bot_dm[9]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 212.610 0.000 212.890 0.280 ;
+    END
+  END gpio_bot_dm[9]
+  PIN gpio_bot_in[0]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    ANTENNAGATEAREA 0.560700 ;
+    ANTENNADIFFAREA 0.434700 ;
+    PORT
+      LAYER met2 ;
+        RECT 9.750 0.000 10.030 0.280 ;
+    END
+  END gpio_bot_in[0]
+  PIN gpio_bot_in[10]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 589.350 0.000 589.630 0.280 ;
+    END
+  END gpio_bot_in[10]
+  PIN gpio_bot_in[11]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 647.310 0.000 647.590 0.280 ;
+    END
+  END gpio_bot_in[11]
+  PIN gpio_bot_in[12]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 705.270 0.000 705.550 0.280 ;
+    END
+  END gpio_bot_in[12]
+  PIN gpio_bot_in[13]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 763.230 0.000 763.510 0.280 ;
+    END
+  END gpio_bot_in[13]
+  PIN gpio_bot_in[14]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 821.190 0.000 821.470 0.280 ;
+    END
+  END gpio_bot_in[14]
+  PIN gpio_bot_in[1]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 67.710 0.000 67.990 0.280 ;
+    END
+  END gpio_bot_in[1]
+  PIN gpio_bot_in[2]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 125.670 0.000 125.950 0.280 ;
+    END
+  END gpio_bot_in[2]
+  PIN gpio_bot_in[3]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 183.630 0.000 183.910 0.280 ;
+    END
+  END gpio_bot_in[3]
+  PIN gpio_bot_in[4]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 241.590 0.000 241.870 0.280 ;
+    END
+  END gpio_bot_in[4]
+  PIN gpio_bot_in[5]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 299.550 0.000 299.830 0.280 ;
+    END
+  END gpio_bot_in[5]
+  PIN gpio_bot_in[6]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 357.510 0.000 357.790 0.280 ;
+    END
+  END gpio_bot_in[6]
+  PIN gpio_bot_in[7]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 415.470 0.000 415.750 0.280 ;
+    END
+  END gpio_bot_in[7]
+  PIN gpio_bot_in[8]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 473.430 0.000 473.710 0.280 ;
+    END
+  END gpio_bot_in[8]
+  PIN gpio_bot_in[9]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 531.390 0.000 531.670 0.280 ;
+    END
+  END gpio_bot_in[9]
+  PIN gpio_bot_oeb[0]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 29.070 0.000 29.350 0.280 ;
+    END
+  END gpio_bot_oeb[0]
+  PIN gpio_bot_oeb[10]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 608.670 0.000 608.950 0.280 ;
+    END
+  END gpio_bot_oeb[10]
+  PIN gpio_bot_oeb[11]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 666.630 0.000 666.910 0.280 ;
+    END
+  END gpio_bot_oeb[11]
+  PIN gpio_bot_oeb[12]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 724.590 0.000 724.870 0.280 ;
+    END
+  END gpio_bot_oeb[12]
+  PIN gpio_bot_oeb[13]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 782.550 0.000 782.830 0.280 ;
+    END
+  END gpio_bot_oeb[13]
+  PIN gpio_bot_oeb[14]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 840.510 0.000 840.790 0.280 ;
+    END
+  END gpio_bot_oeb[14]
+  PIN gpio_bot_oeb[1]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 87.030 0.000 87.310 0.280 ;
+    END
+  END gpio_bot_oeb[1]
+  PIN gpio_bot_oeb[2]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 144.990 0.000 145.270 0.280 ;
+    END
+  END gpio_bot_oeb[2]
+  PIN gpio_bot_oeb[3]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 202.950 0.000 203.230 0.280 ;
+    END
+  END gpio_bot_oeb[3]
+  PIN gpio_bot_oeb[4]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 260.910 0.000 261.190 0.280 ;
+    END
+  END gpio_bot_oeb[4]
+  PIN gpio_bot_oeb[5]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 318.870 0.000 319.150 0.280 ;
+    END
+  END gpio_bot_oeb[5]
+  PIN gpio_bot_oeb[6]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 376.830 0.000 377.110 0.280 ;
+    END
+  END gpio_bot_oeb[6]
+  PIN gpio_bot_oeb[7]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 434.790 0.000 435.070 0.280 ;
+    END
+  END gpio_bot_oeb[7]
+  PIN gpio_bot_oeb[8]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 492.750 0.000 493.030 0.280 ;
+    END
+  END gpio_bot_oeb[8]
+  PIN gpio_bot_oeb[9]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 550.710 0.000 550.990 0.280 ;
+    END
+  END gpio_bot_oeb[9]
+  PIN gpio_bot_out[0]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 19.410 0.000 19.690 0.280 ;
+    END
+  END gpio_bot_out[0]
+  PIN gpio_bot_out[10]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 599.010 0.000 599.290 0.280 ;
+    END
+  END gpio_bot_out[10]
+  PIN gpio_bot_out[11]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 656.970 0.000 657.250 0.280 ;
+    END
+  END gpio_bot_out[11]
+  PIN gpio_bot_out[12]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 714.930 0.000 715.210 0.280 ;
+    END
+  END gpio_bot_out[12]
+  PIN gpio_bot_out[13]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 772.890 0.000 773.170 0.280 ;
+    END
+  END gpio_bot_out[13]
+  PIN gpio_bot_out[14]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 830.850 0.000 831.130 0.280 ;
+    END
+  END gpio_bot_out[14]
+  PIN gpio_bot_out[1]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    ANTENNADIFFAREA 2.673000 ;
+    PORT
+      LAYER met2 ;
+        RECT 77.370 0.000 77.650 0.280 ;
+    END
+  END gpio_bot_out[1]
+  PIN gpio_bot_out[2]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    ANTENNADIFFAREA 2.673000 ;
+    PORT
+      LAYER met2 ;
+        RECT 135.330 0.000 135.610 0.280 ;
+    END
+  END gpio_bot_out[2]
+  PIN gpio_bot_out[3]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    ANTENNADIFFAREA 2.673000 ;
+    PORT
+      LAYER met2 ;
+        RECT 193.290 0.000 193.570 0.280 ;
+    END
+  END gpio_bot_out[3]
+  PIN gpio_bot_out[4]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    ANTENNADIFFAREA 2.673000 ;
+    PORT
+      LAYER met2 ;
+        RECT 251.250 0.000 251.530 0.280 ;
+    END
+  END gpio_bot_out[4]
+  PIN gpio_bot_out[5]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 309.210 0.000 309.490 0.280 ;
+    END
+  END gpio_bot_out[5]
+  PIN gpio_bot_out[6]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 367.170 0.000 367.450 0.280 ;
+    END
+  END gpio_bot_out[6]
+  PIN gpio_bot_out[7]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 425.130 0.000 425.410 0.280 ;
+    END
+  END gpio_bot_out[7]
+  PIN gpio_bot_out[8]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 483.090 0.000 483.370 0.280 ;
+    END
+  END gpio_bot_out[8]
+  PIN gpio_bot_out[9]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 541.050 0.000 541.330 0.280 ;
+    END
+  END gpio_bot_out[9]
+  PIN gpio_rt_dm[0]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 68.040 880.000 68.640 ;
+    END
+  END gpio_rt_dm[0]
+  PIN gpio_rt_dm[10]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 429.800 880.000 430.400 ;
+    END
+  END gpio_rt_dm[10]
+  PIN gpio_rt_dm[11]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 448.840 880.000 449.440 ;
+    END
+  END gpio_rt_dm[11]
+  PIN gpio_rt_dm[12]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 525.000 880.000 525.600 ;
+    END
+  END gpio_rt_dm[12]
+  PIN gpio_rt_dm[13]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 544.040 880.000 544.640 ;
+    END
+  END gpio_rt_dm[13]
+  PIN gpio_rt_dm[14]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 563.080 880.000 563.680 ;
+    END
+  END gpio_rt_dm[14]
+  PIN gpio_rt_dm[15]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 639.240 880.000 639.840 ;
+    END
+  END gpio_rt_dm[15]
+  PIN gpio_rt_dm[16]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 658.280 880.000 658.880 ;
+    END
+  END gpio_rt_dm[16]
+  PIN gpio_rt_dm[17]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 677.320 880.000 677.920 ;
+    END
+  END gpio_rt_dm[17]
+  PIN gpio_rt_dm[18]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 753.480 880.000 754.080 ;
+    END
+  END gpio_rt_dm[18]
+  PIN gpio_rt_dm[19]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 772.520 880.000 773.120 ;
+    END
+  END gpio_rt_dm[19]
+  PIN gpio_rt_dm[1]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 87.080 880.000 87.680 ;
+    END
+  END gpio_rt_dm[1]
+  PIN gpio_rt_dm[20]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 791.560 880.000 792.160 ;
+    END
+  END gpio_rt_dm[20]
+  PIN gpio_rt_dm[21]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 867.720 880.000 868.320 ;
+    END
+  END gpio_rt_dm[21]
+  PIN gpio_rt_dm[22]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 886.760 880.000 887.360 ;
+    END
+  END gpio_rt_dm[22]
+  PIN gpio_rt_dm[23]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 905.800 880.000 906.400 ;
+    END
+  END gpio_rt_dm[23]
+  PIN gpio_rt_dm[24]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 981.960 880.000 982.560 ;
+    END
+  END gpio_rt_dm[24]
+  PIN gpio_rt_dm[25]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 1001.000 880.000 1001.600 ;
+    END
+  END gpio_rt_dm[25]
+  PIN gpio_rt_dm[26]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 1020.040 880.000 1020.640 ;
+    END
+  END gpio_rt_dm[26]
+  PIN gpio_rt_dm[2]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 106.120 880.000 106.720 ;
+    END
+  END gpio_rt_dm[2]
+  PIN gpio_rt_dm[3]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 182.280 880.000 182.880 ;
+    END
+  END gpio_rt_dm[3]
+  PIN gpio_rt_dm[4]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 201.320 880.000 201.920 ;
+    END
+  END gpio_rt_dm[4]
+  PIN gpio_rt_dm[5]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 220.360 880.000 220.960 ;
+    END
+  END gpio_rt_dm[5]
+  PIN gpio_rt_dm[6]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 296.520 880.000 297.120 ;
+    END
+  END gpio_rt_dm[6]
+  PIN gpio_rt_dm[7]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 315.560 880.000 316.160 ;
+    END
+  END gpio_rt_dm[7]
+  PIN gpio_rt_dm[8]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 334.600 880.000 335.200 ;
+    END
+  END gpio_rt_dm[8]
+  PIN gpio_rt_dm[9]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 410.760 880.000 411.360 ;
+    END
+  END gpio_rt_dm[9]
+  PIN gpio_rt_in[0]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 10.920 880.000 11.520 ;
+    END
+  END gpio_rt_in[0]
+  PIN gpio_rt_in[1]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 125.160 880.000 125.760 ;
+    END
+  END gpio_rt_in[1]
+  PIN gpio_rt_in[2]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 239.400 880.000 240.000 ;
+    END
+  END gpio_rt_in[2]
+  PIN gpio_rt_in[3]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 353.640 880.000 354.240 ;
+    END
+  END gpio_rt_in[3]
+  PIN gpio_rt_in[4]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 467.880 880.000 468.480 ;
+    END
+  END gpio_rt_in[4]
+  PIN gpio_rt_in[5]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 582.120 880.000 582.720 ;
+    END
+  END gpio_rt_in[5]
+  PIN gpio_rt_in[6]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 696.360 880.000 696.960 ;
+    END
+  END gpio_rt_in[6]
+  PIN gpio_rt_in[7]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 810.600 880.000 811.200 ;
+    END
+  END gpio_rt_in[7]
+  PIN gpio_rt_in[8]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 924.840 880.000 925.440 ;
+    END
+  END gpio_rt_in[8]
+  PIN gpio_rt_oeb[0]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 49.000 880.000 49.600 ;
+    END
+  END gpio_rt_oeb[0]
+  PIN gpio_rt_oeb[1]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 163.240 880.000 163.840 ;
+    END
+  END gpio_rt_oeb[1]
+  PIN gpio_rt_oeb[2]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 277.480 880.000 278.080 ;
+    END
+  END gpio_rt_oeb[2]
+  PIN gpio_rt_oeb[3]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 391.720 880.000 392.320 ;
+    END
+  END gpio_rt_oeb[3]
+  PIN gpio_rt_oeb[4]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 505.960 880.000 506.560 ;
+    END
+  END gpio_rt_oeb[4]
+  PIN gpio_rt_oeb[5]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 620.200 880.000 620.800 ;
+    END
+  END gpio_rt_oeb[5]
+  PIN gpio_rt_oeb[6]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 734.440 880.000 735.040 ;
+    END
+  END gpio_rt_oeb[6]
+  PIN gpio_rt_oeb[7]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 848.680 880.000 849.280 ;
+    END
+  END gpio_rt_oeb[7]
+  PIN gpio_rt_oeb[8]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 962.920 880.000 963.520 ;
+    END
+  END gpio_rt_oeb[8]
+  PIN gpio_rt_out[0]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 29.960 880.000 30.560 ;
+    END
+  END gpio_rt_out[0]
+  PIN gpio_rt_out[1]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 144.200 880.000 144.800 ;
+    END
+  END gpio_rt_out[1]
+  PIN gpio_rt_out[2]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 258.440 880.000 259.040 ;
+    END
+  END gpio_rt_out[2]
+  PIN gpio_rt_out[3]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 372.680 880.000 373.280 ;
+    END
+  END gpio_rt_out[3]
+  PIN gpio_rt_out[4]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 486.920 880.000 487.520 ;
+    END
+  END gpio_rt_out[4]
+  PIN gpio_rt_out[5]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 601.160 880.000 601.760 ;
+    END
+  END gpio_rt_out[5]
+  PIN gpio_rt_out[6]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 715.400 880.000 716.000 ;
+    END
+  END gpio_rt_out[6]
+  PIN gpio_rt_out[7]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 829.640 880.000 830.240 ;
+    END
+  END gpio_rt_out[7]
+  PIN gpio_rt_out[8]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 879.400 943.880 880.000 944.480 ;
+    END
+  END gpio_rt_out[8]
+  PIN gpio_top_dm[0]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 50.230 1031.380 50.510 1031.660 ;
+    END
+  END gpio_top_dm[0]
+  PIN gpio_top_dm[10]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 242.510 1031.380 242.790 1031.660 ;
+    END
+  END gpio_top_dm[10]
+  PIN gpio_top_dm[11]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 252.630 1031.380 252.910 1031.660 ;
+    END
+  END gpio_top_dm[11]
+  PIN gpio_top_dm[12]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 293.110 1031.380 293.390 1031.660 ;
+    END
+  END gpio_top_dm[12]
+  PIN gpio_top_dm[13]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 303.230 1031.380 303.510 1031.660 ;
+    END
+  END gpio_top_dm[13]
+  PIN gpio_top_dm[14]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 313.350 1031.380 313.630 1031.660 ;
+    END
+  END gpio_top_dm[14]
+  PIN gpio_top_dm[15]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 353.830 1031.380 354.110 1031.660 ;
+    END
+  END gpio_top_dm[15]
+  PIN gpio_top_dm[16]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 363.950 1031.380 364.230 1031.660 ;
+    END
+  END gpio_top_dm[16]
+  PIN gpio_top_dm[17]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 374.070 1031.380 374.350 1031.660 ;
+    END
+  END gpio_top_dm[17]
+  PIN gpio_top_dm[18]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 414.550 1031.380 414.830 1031.660 ;
+    END
+  END gpio_top_dm[18]
+  PIN gpio_top_dm[19]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 424.670 1031.380 424.950 1031.660 ;
+    END
+  END gpio_top_dm[19]
+  PIN gpio_top_dm[1]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 60.350 1031.380 60.630 1031.660 ;
+    END
+  END gpio_top_dm[1]
+  PIN gpio_top_dm[20]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 434.790 1031.380 435.070 1031.660 ;
+    END
+  END gpio_top_dm[20]
+  PIN gpio_top_dm[21]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 475.270 1031.380 475.550 1031.660 ;
+    END
+  END gpio_top_dm[21]
+  PIN gpio_top_dm[22]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 485.390 1031.380 485.670 1031.660 ;
+    END
+  END gpio_top_dm[22]
+  PIN gpio_top_dm[23]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 495.510 1031.380 495.790 1031.660 ;
+    END
+  END gpio_top_dm[23]
+  PIN gpio_top_dm[24]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 535.990 1031.380 536.270 1031.660 ;
+    END
+  END gpio_top_dm[24]
+  PIN gpio_top_dm[25]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 546.110 1031.380 546.390 1031.660 ;
+    END
+  END gpio_top_dm[25]
+  PIN gpio_top_dm[26]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 556.230 1031.380 556.510 1031.660 ;
+    END
+  END gpio_top_dm[26]
+  PIN gpio_top_dm[27]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 596.710 1031.380 596.990 1031.660 ;
+    END
+  END gpio_top_dm[27]
+  PIN gpio_top_dm[28]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 606.830 1031.380 607.110 1031.660 ;
+    END
+  END gpio_top_dm[28]
+  PIN gpio_top_dm[29]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 616.950 1031.380 617.230 1031.660 ;
+    END
+  END gpio_top_dm[29]
+  PIN gpio_top_dm[2]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 70.470 1031.380 70.750 1031.660 ;
+    END
+  END gpio_top_dm[2]
+  PIN gpio_top_dm[30]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 657.430 1031.380 657.710 1031.660 ;
+    END
+  END gpio_top_dm[30]
+  PIN gpio_top_dm[31]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 667.550 1031.380 667.830 1031.660 ;
+    END
+  END gpio_top_dm[31]
+  PIN gpio_top_dm[32]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 677.670 1031.380 677.950 1031.660 ;
+    END
+  END gpio_top_dm[32]
+  PIN gpio_top_dm[33]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 718.150 1031.380 718.430 1031.660 ;
+    END
+  END gpio_top_dm[33]
+  PIN gpio_top_dm[34]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 728.270 1031.380 728.550 1031.660 ;
+    END
+  END gpio_top_dm[34]
+  PIN gpio_top_dm[35]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 738.390 1031.380 738.670 1031.660 ;
+    END
+  END gpio_top_dm[35]
+  PIN gpio_top_dm[36]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 778.870 1031.380 779.150 1031.660 ;
+    END
+  END gpio_top_dm[36]
+  PIN gpio_top_dm[37]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 788.990 1031.380 789.270 1031.660 ;
+    END
+  END gpio_top_dm[37]
+  PIN gpio_top_dm[38]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 799.110 1031.380 799.390 1031.660 ;
+    END
+  END gpio_top_dm[38]
+  PIN gpio_top_dm[39]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 839.590 1031.380 839.870 1031.660 ;
+    END
+  END gpio_top_dm[39]
+  PIN gpio_top_dm[3]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 110.950 1031.380 111.230 1031.660 ;
+    END
+  END gpio_top_dm[3]
+  PIN gpio_top_dm[40]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 849.710 1031.380 849.990 1031.660 ;
+    END
+  END gpio_top_dm[40]
+  PIN gpio_top_dm[41]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 859.830 1031.380 860.110 1031.660 ;
+    END
+  END gpio_top_dm[41]
+  PIN gpio_top_dm[4]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 121.070 1031.380 121.350 1031.660 ;
+    END
+  END gpio_top_dm[4]
+  PIN gpio_top_dm[5]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 131.190 1031.380 131.470 1031.660 ;
+    END
+  END gpio_top_dm[5]
+  PIN gpio_top_dm[6]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 171.670 1031.380 171.950 1031.660 ;
+    END
+  END gpio_top_dm[6]
+  PIN gpio_top_dm[7]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 181.790 1031.380 182.070 1031.660 ;
+    END
+  END gpio_top_dm[7]
+  PIN gpio_top_dm[8]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 191.910 1031.380 192.190 1031.660 ;
+    END
+  END gpio_top_dm[8]
+  PIN gpio_top_dm[9]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 232.390 1031.380 232.670 1031.660 ;
+    END
+  END gpio_top_dm[9]
+  PIN gpio_top_in[0]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 19.870 1031.380 20.150 1031.660 ;
+    END
+  END gpio_top_in[0]
+  PIN gpio_top_in[10]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 627.070 1031.380 627.350 1031.660 ;
+    END
+  END gpio_top_in[10]
+  PIN gpio_top_in[11]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 687.790 1031.380 688.070 1031.660 ;
+    END
+  END gpio_top_in[11]
+  PIN gpio_top_in[12]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 748.510 1031.380 748.790 1031.660 ;
+    END
+  END gpio_top_in[12]
+  PIN gpio_top_in[13]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 809.230 1031.380 809.510 1031.660 ;
+    END
+  END gpio_top_in[13]
+  PIN gpio_top_in[1]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 80.590 1031.380 80.870 1031.660 ;
+    END
+  END gpio_top_in[1]
+  PIN gpio_top_in[2]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 141.310 1031.380 141.590 1031.660 ;
+    END
+  END gpio_top_in[2]
+  PIN gpio_top_in[3]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 202.030 1031.380 202.310 1031.660 ;
+    END
+  END gpio_top_in[3]
+  PIN gpio_top_in[4]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 262.750 1031.380 263.030 1031.660 ;
+    END
+  END gpio_top_in[4]
+  PIN gpio_top_in[5]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 323.470 1031.380 323.750 1031.660 ;
+    END
+  END gpio_top_in[5]
+  PIN gpio_top_in[6]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 384.190 1031.380 384.470 1031.660 ;
+    END
+  END gpio_top_in[6]
+  PIN gpio_top_in[7]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 444.910 1031.380 445.190 1031.660 ;
+    END
+  END gpio_top_in[7]
+  PIN gpio_top_in[8]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 505.630 1031.380 505.910 1031.660 ;
+    END
+  END gpio_top_in[8]
+  PIN gpio_top_in[9]
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 566.350 1031.380 566.630 1031.660 ;
+    END
+  END gpio_top_in[9]
+  PIN gpio_top_oeb[0]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 40.110 1031.380 40.390 1031.660 ;
+    END
+  END gpio_top_oeb[0]
+  PIN gpio_top_oeb[10]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 647.310 1031.380 647.590 1031.660 ;
+    END
+  END gpio_top_oeb[10]
+  PIN gpio_top_oeb[11]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 708.030 1031.380 708.310 1031.660 ;
+    END
+  END gpio_top_oeb[11]
+  PIN gpio_top_oeb[12]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 768.750 1031.380 769.030 1031.660 ;
+    END
+  END gpio_top_oeb[12]
+  PIN gpio_top_oeb[13]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 829.470 1031.380 829.750 1031.660 ;
+    END
+  END gpio_top_oeb[13]
+  PIN gpio_top_oeb[1]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 100.830 1031.380 101.110 1031.660 ;
+    END
+  END gpio_top_oeb[1]
+  PIN gpio_top_oeb[2]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 161.550 1031.380 161.830 1031.660 ;
+    END
+  END gpio_top_oeb[2]
+  PIN gpio_top_oeb[3]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 222.270 1031.380 222.550 1031.660 ;
+    END
+  END gpio_top_oeb[3]
+  PIN gpio_top_oeb[4]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 282.990 1031.380 283.270 1031.660 ;
+    END
+  END gpio_top_oeb[4]
+  PIN gpio_top_oeb[5]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 343.710 1031.380 343.990 1031.660 ;
+    END
+  END gpio_top_oeb[5]
+  PIN gpio_top_oeb[6]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 404.430 1031.380 404.710 1031.660 ;
+    END
+  END gpio_top_oeb[6]
+  PIN gpio_top_oeb[7]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 465.150 1031.380 465.430 1031.660 ;
+    END
+  END gpio_top_oeb[7]
+  PIN gpio_top_oeb[8]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 525.870 1031.380 526.150 1031.660 ;
+    END
+  END gpio_top_oeb[8]
+  PIN gpio_top_oeb[9]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 586.590 1031.380 586.870 1031.660 ;
+    END
+  END gpio_top_oeb[9]
+  PIN gpio_top_out[0]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 29.990 1031.380 30.270 1031.660 ;
+    END
+  END gpio_top_out[0]
+  PIN gpio_top_out[10]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 637.190 1031.380 637.470 1031.660 ;
+    END
+  END gpio_top_out[10]
+  PIN gpio_top_out[11]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 697.910 1031.380 698.190 1031.660 ;
+    END
+  END gpio_top_out[11]
+  PIN gpio_top_out[12]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 758.630 1031.380 758.910 1031.660 ;
+    END
+  END gpio_top_out[12]
+  PIN gpio_top_out[13]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 819.350 1031.380 819.630 1031.660 ;
+    END
+  END gpio_top_out[13]
+  PIN gpio_top_out[1]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 90.710 1031.380 90.990 1031.660 ;
+    END
+  END gpio_top_out[1]
+  PIN gpio_top_out[2]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 151.430 1031.380 151.710 1031.660 ;
+    END
+  END gpio_top_out[2]
+  PIN gpio_top_out[3]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 212.150 1031.380 212.430 1031.660 ;
+    END
+  END gpio_top_out[3]
+  PIN gpio_top_out[4]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 272.870 1031.380 273.150 1031.660 ;
+    END
+  END gpio_top_out[4]
+  PIN gpio_top_out[5]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 333.590 1031.380 333.870 1031.660 ;
+    END
+  END gpio_top_out[5]
+  PIN gpio_top_out[6]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 394.310 1031.380 394.590 1031.660 ;
+    END
+  END gpio_top_out[6]
+  PIN gpio_top_out[7]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 455.030 1031.380 455.310 1031.660 ;
+    END
+  END gpio_top_out[7]
+  PIN gpio_top_out[8]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 515.750 1031.380 516.030 1031.660 ;
+    END
+  END gpio_top_out[8]
+  PIN gpio_top_out[9]
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met2 ;
+        RECT 576.470 1031.380 576.750 1031.660 ;
+    END
+  END gpio_top_out[9]
+  PIN por_n
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    PORT
+      LAYER met3 ;
+        RECT 0.000 859.560 0.600 860.160 ;
+    END
+  END por_n
+  PIN reset_n
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    ANTENNAGATEAREA 0.593700 ;
+    ANTENNADIFFAREA 0.434700 ;
+    PORT
+      LAYER met3 ;
+        RECT 0.000 515.480 0.600 516.080 ;
+    END
+  END reset_n
+  PIN vccd1
+    DIRECTION INOUT ;
+    USE POWER ;
+    PORT
+      LAYER met4 ;
+        RECT 21.040 10.640 22.640 1020.240 ;
+    END
+    PORT
+      LAYER met4 ;
+        RECT 174.640 10.640 176.240 1020.240 ;
+    END
+    PORT
+      LAYER met4 ;
+        RECT 328.240 10.640 329.840 1020.240 ;
+    END
+    PORT
+      LAYER met4 ;
+        RECT 481.840 10.640 483.440 1020.240 ;
+    END
+    PORT
+      LAYER met4 ;
+        RECT 635.440 10.640 637.040 1020.240 ;
+    END
+    PORT
+      LAYER met4 ;
+        RECT 789.040 10.640 790.640 1020.240 ;
+    END
+  END vccd1
+  PIN vssd1
+    DIRECTION INOUT ;
+    USE GROUND ;
+    PORT
+      LAYER met4 ;
+        RECT 24.340 10.640 25.940 1020.240 ;
+    END
+    PORT
+      LAYER met4 ;
+        RECT 177.940 10.640 179.540 1020.240 ;
+    END
+    PORT
+      LAYER met4 ;
+        RECT 331.540 10.640 333.140 1020.240 ;
+    END
+    PORT
+      LAYER met4 ;
+        RECT 485.140 10.640 486.740 1020.240 ;
+    END
+    PORT
+      LAYER met4 ;
+        RECT 638.740 10.640 640.340 1020.240 ;
+    END
+    PORT
+      LAYER met4 ;
+        RECT 792.340 10.640 793.940 1020.240 ;
+    END
+  END vssd1
+  OBS
+      LAYER nwell ;
+        RECT 5.330 10.795 874.650 1020.190 ;
+      LAYER li1 ;
+        RECT 5.520 10.795 874.460 1020.085 ;
+      LAYER met1 ;
+        RECT 0.530 6.160 874.850 1022.000 ;
+      LAYER met2 ;
+        RECT 0.550 1031.100 19.590 1031.380 ;
+        RECT 20.430 1031.100 29.710 1031.380 ;
+        RECT 30.550 1031.100 39.830 1031.380 ;
+        RECT 40.670 1031.100 49.950 1031.380 ;
+        RECT 50.790 1031.100 60.070 1031.380 ;
+        RECT 60.910 1031.100 70.190 1031.380 ;
+        RECT 71.030 1031.100 80.310 1031.380 ;
+        RECT 81.150 1031.100 90.430 1031.380 ;
+        RECT 91.270 1031.100 100.550 1031.380 ;
+        RECT 101.390 1031.100 110.670 1031.380 ;
+        RECT 111.510 1031.100 120.790 1031.380 ;
+        RECT 121.630 1031.100 130.910 1031.380 ;
+        RECT 131.750 1031.100 141.030 1031.380 ;
+        RECT 141.870 1031.100 151.150 1031.380 ;
+        RECT 151.990 1031.100 161.270 1031.380 ;
+        RECT 162.110 1031.100 171.390 1031.380 ;
+        RECT 172.230 1031.100 181.510 1031.380 ;
+        RECT 182.350 1031.100 191.630 1031.380 ;
+        RECT 192.470 1031.100 201.750 1031.380 ;
+        RECT 202.590 1031.100 211.870 1031.380 ;
+        RECT 212.710 1031.100 221.990 1031.380 ;
+        RECT 222.830 1031.100 232.110 1031.380 ;
+        RECT 232.950 1031.100 242.230 1031.380 ;
+        RECT 243.070 1031.100 252.350 1031.380 ;
+        RECT 253.190 1031.100 262.470 1031.380 ;
+        RECT 263.310 1031.100 272.590 1031.380 ;
+        RECT 273.430 1031.100 282.710 1031.380 ;
+        RECT 283.550 1031.100 292.830 1031.380 ;
+        RECT 293.670 1031.100 302.950 1031.380 ;
+        RECT 303.790 1031.100 313.070 1031.380 ;
+        RECT 313.910 1031.100 323.190 1031.380 ;
+        RECT 324.030 1031.100 333.310 1031.380 ;
+        RECT 334.150 1031.100 343.430 1031.380 ;
+        RECT 344.270 1031.100 353.550 1031.380 ;
+        RECT 354.390 1031.100 363.670 1031.380 ;
+        RECT 364.510 1031.100 373.790 1031.380 ;
+        RECT 374.630 1031.100 383.910 1031.380 ;
+        RECT 384.750 1031.100 394.030 1031.380 ;
+        RECT 394.870 1031.100 404.150 1031.380 ;
+        RECT 404.990 1031.100 414.270 1031.380 ;
+        RECT 415.110 1031.100 424.390 1031.380 ;
+        RECT 425.230 1031.100 434.510 1031.380 ;
+        RECT 435.350 1031.100 444.630 1031.380 ;
+        RECT 445.470 1031.100 454.750 1031.380 ;
+        RECT 455.590 1031.100 464.870 1031.380 ;
+        RECT 465.710 1031.100 474.990 1031.380 ;
+        RECT 475.830 1031.100 485.110 1031.380 ;
+        RECT 485.950 1031.100 495.230 1031.380 ;
+        RECT 496.070 1031.100 505.350 1031.380 ;
+        RECT 506.190 1031.100 515.470 1031.380 ;
+        RECT 516.310 1031.100 525.590 1031.380 ;
+        RECT 526.430 1031.100 535.710 1031.380 ;
+        RECT 536.550 1031.100 545.830 1031.380 ;
+        RECT 546.670 1031.100 555.950 1031.380 ;
+        RECT 556.790 1031.100 566.070 1031.380 ;
+        RECT 566.910 1031.100 576.190 1031.380 ;
+        RECT 577.030 1031.100 586.310 1031.380 ;
+        RECT 587.150 1031.100 596.430 1031.380 ;
+        RECT 597.270 1031.100 606.550 1031.380 ;
+        RECT 607.390 1031.100 616.670 1031.380 ;
+        RECT 617.510 1031.100 626.790 1031.380 ;
+        RECT 627.630 1031.100 636.910 1031.380 ;
+        RECT 637.750 1031.100 647.030 1031.380 ;
+        RECT 647.870 1031.100 657.150 1031.380 ;
+        RECT 657.990 1031.100 667.270 1031.380 ;
+        RECT 668.110 1031.100 677.390 1031.380 ;
+        RECT 678.230 1031.100 687.510 1031.380 ;
+        RECT 688.350 1031.100 697.630 1031.380 ;
+        RECT 698.470 1031.100 707.750 1031.380 ;
+        RECT 708.590 1031.100 717.870 1031.380 ;
+        RECT 718.710 1031.100 727.990 1031.380 ;
+        RECT 728.830 1031.100 738.110 1031.380 ;
+        RECT 738.950 1031.100 748.230 1031.380 ;
+        RECT 749.070 1031.100 758.350 1031.380 ;
+        RECT 759.190 1031.100 768.470 1031.380 ;
+        RECT 769.310 1031.100 778.590 1031.380 ;
+        RECT 779.430 1031.100 788.710 1031.380 ;
+        RECT 789.550 1031.100 798.830 1031.380 ;
+        RECT 799.670 1031.100 808.950 1031.380 ;
+        RECT 809.790 1031.100 819.070 1031.380 ;
+        RECT 819.910 1031.100 829.190 1031.380 ;
+        RECT 830.030 1031.100 839.310 1031.380 ;
+        RECT 840.150 1031.100 849.430 1031.380 ;
+        RECT 850.270 1031.100 859.550 1031.380 ;
+        RECT 860.390 1031.100 874.820 1031.380 ;
+        RECT 0.550 0.560 874.820 1031.100 ;
+        RECT 0.550 0.070 9.470 0.560 ;
+        RECT 10.310 0.070 19.130 0.560 ;
+        RECT 19.970 0.070 28.790 0.560 ;
+        RECT 29.630 0.070 38.450 0.560 ;
+        RECT 39.290 0.070 48.110 0.560 ;
+        RECT 48.950 0.070 57.770 0.560 ;
+        RECT 58.610 0.070 67.430 0.560 ;
+        RECT 68.270 0.070 77.090 0.560 ;
+        RECT 77.930 0.070 86.750 0.560 ;
+        RECT 87.590 0.070 96.410 0.560 ;
+        RECT 97.250 0.070 106.070 0.560 ;
+        RECT 106.910 0.070 115.730 0.560 ;
+        RECT 116.570 0.070 125.390 0.560 ;
+        RECT 126.230 0.070 135.050 0.560 ;
+        RECT 135.890 0.070 144.710 0.560 ;
+        RECT 145.550 0.070 154.370 0.560 ;
+        RECT 155.210 0.070 164.030 0.560 ;
+        RECT 164.870 0.070 173.690 0.560 ;
+        RECT 174.530 0.070 183.350 0.560 ;
+        RECT 184.190 0.070 193.010 0.560 ;
+        RECT 193.850 0.070 202.670 0.560 ;
+        RECT 203.510 0.070 212.330 0.560 ;
+        RECT 213.170 0.070 221.990 0.560 ;
+        RECT 222.830 0.070 231.650 0.560 ;
+        RECT 232.490 0.070 241.310 0.560 ;
+        RECT 242.150 0.070 250.970 0.560 ;
+        RECT 251.810 0.070 260.630 0.560 ;
+        RECT 261.470 0.070 270.290 0.560 ;
+        RECT 271.130 0.070 279.950 0.560 ;
+        RECT 280.790 0.070 289.610 0.560 ;
+        RECT 290.450 0.070 299.270 0.560 ;
+        RECT 300.110 0.070 308.930 0.560 ;
+        RECT 309.770 0.070 318.590 0.560 ;
+        RECT 319.430 0.070 328.250 0.560 ;
+        RECT 329.090 0.070 337.910 0.560 ;
+        RECT 338.750 0.070 347.570 0.560 ;
+        RECT 348.410 0.070 357.230 0.560 ;
+        RECT 358.070 0.070 366.890 0.560 ;
+        RECT 367.730 0.070 376.550 0.560 ;
+        RECT 377.390 0.070 386.210 0.560 ;
+        RECT 387.050 0.070 395.870 0.560 ;
+        RECT 396.710 0.070 405.530 0.560 ;
+        RECT 406.370 0.070 415.190 0.560 ;
+        RECT 416.030 0.070 424.850 0.560 ;
+        RECT 425.690 0.070 434.510 0.560 ;
+        RECT 435.350 0.070 444.170 0.560 ;
+        RECT 445.010 0.070 453.830 0.560 ;
+        RECT 454.670 0.070 463.490 0.560 ;
+        RECT 464.330 0.070 473.150 0.560 ;
+        RECT 473.990 0.070 482.810 0.560 ;
+        RECT 483.650 0.070 492.470 0.560 ;
+        RECT 493.310 0.070 502.130 0.560 ;
+        RECT 502.970 0.070 511.790 0.560 ;
+        RECT 512.630 0.070 521.450 0.560 ;
+        RECT 522.290 0.070 531.110 0.560 ;
+        RECT 531.950 0.070 540.770 0.560 ;
+        RECT 541.610 0.070 550.430 0.560 ;
+        RECT 551.270 0.070 560.090 0.560 ;
+        RECT 560.930 0.070 569.750 0.560 ;
+        RECT 570.590 0.070 579.410 0.560 ;
+        RECT 580.250 0.070 589.070 0.560 ;
+        RECT 589.910 0.070 598.730 0.560 ;
+        RECT 599.570 0.070 608.390 0.560 ;
+        RECT 609.230 0.070 618.050 0.560 ;
+        RECT 618.890 0.070 627.710 0.560 ;
+        RECT 628.550 0.070 637.370 0.560 ;
+        RECT 638.210 0.070 647.030 0.560 ;
+        RECT 647.870 0.070 656.690 0.560 ;
+        RECT 657.530 0.070 666.350 0.560 ;
+        RECT 667.190 0.070 676.010 0.560 ;
+        RECT 676.850 0.070 685.670 0.560 ;
+        RECT 686.510 0.070 695.330 0.560 ;
+        RECT 696.170 0.070 704.990 0.560 ;
+        RECT 705.830 0.070 714.650 0.560 ;
+        RECT 715.490 0.070 724.310 0.560 ;
+        RECT 725.150 0.070 733.970 0.560 ;
+        RECT 734.810 0.070 743.630 0.560 ;
+        RECT 744.470 0.070 753.290 0.560 ;
+        RECT 754.130 0.070 762.950 0.560 ;
+        RECT 763.790 0.070 772.610 0.560 ;
+        RECT 773.450 0.070 782.270 0.560 ;
+        RECT 783.110 0.070 791.930 0.560 ;
+        RECT 792.770 0.070 801.590 0.560 ;
+        RECT 802.430 0.070 811.250 0.560 ;
+        RECT 812.090 0.070 820.910 0.560 ;
+        RECT 821.750 0.070 830.570 0.560 ;
+        RECT 831.410 0.070 840.230 0.560 ;
+        RECT 841.070 0.070 849.890 0.560 ;
+        RECT 850.730 0.070 859.550 0.560 ;
+        RECT 860.390 0.070 869.210 0.560 ;
+        RECT 870.050 0.070 874.820 0.560 ;
+      LAYER met3 ;
+        RECT 0.600 1019.640 879.000 1020.505 ;
+        RECT 0.600 1002.000 879.400 1019.640 ;
+        RECT 0.600 1000.600 879.000 1002.000 ;
+        RECT 0.600 982.960 879.400 1000.600 ;
+        RECT 0.600 981.560 879.000 982.960 ;
+        RECT 0.600 963.920 879.400 981.560 ;
+        RECT 0.600 962.520 879.000 963.920 ;
+        RECT 0.600 944.880 879.400 962.520 ;
+        RECT 0.600 943.480 879.000 944.880 ;
+        RECT 0.600 925.840 879.400 943.480 ;
+        RECT 0.600 924.440 879.000 925.840 ;
+        RECT 0.600 906.800 879.400 924.440 ;
+        RECT 0.600 905.400 879.000 906.800 ;
+        RECT 0.600 887.760 879.400 905.400 ;
+        RECT 0.600 886.360 879.000 887.760 ;
+        RECT 0.600 868.720 879.400 886.360 ;
+        RECT 0.600 867.320 879.000 868.720 ;
+        RECT 0.600 860.560 879.400 867.320 ;
+        RECT 1.000 859.160 879.400 860.560 ;
+        RECT 0.600 849.680 879.400 859.160 ;
+        RECT 0.600 848.280 879.000 849.680 ;
+        RECT 0.600 830.640 879.400 848.280 ;
+        RECT 0.600 829.240 879.000 830.640 ;
+        RECT 0.600 811.600 879.400 829.240 ;
+        RECT 0.600 810.200 879.000 811.600 ;
+        RECT 0.600 792.560 879.400 810.200 ;
+        RECT 0.600 791.160 879.000 792.560 ;
+        RECT 0.600 773.520 879.400 791.160 ;
+        RECT 0.600 772.120 879.000 773.520 ;
+        RECT 0.600 754.480 879.400 772.120 ;
+        RECT 0.600 753.080 879.000 754.480 ;
+        RECT 0.600 735.440 879.400 753.080 ;
+        RECT 0.600 734.040 879.000 735.440 ;
+        RECT 0.600 716.400 879.400 734.040 ;
+        RECT 0.600 715.000 879.000 716.400 ;
+        RECT 0.600 697.360 879.400 715.000 ;
+        RECT 0.600 695.960 879.000 697.360 ;
+        RECT 0.600 678.320 879.400 695.960 ;
+        RECT 0.600 676.920 879.000 678.320 ;
+        RECT 0.600 659.280 879.400 676.920 ;
+        RECT 0.600 657.880 879.000 659.280 ;
+        RECT 0.600 640.240 879.400 657.880 ;
+        RECT 0.600 638.840 879.000 640.240 ;
+        RECT 0.600 621.200 879.400 638.840 ;
+        RECT 0.600 619.800 879.000 621.200 ;
+        RECT 0.600 602.160 879.400 619.800 ;
+        RECT 0.600 600.760 879.000 602.160 ;
+        RECT 0.600 583.120 879.400 600.760 ;
+        RECT 0.600 581.720 879.000 583.120 ;
+        RECT 0.600 564.080 879.400 581.720 ;
+        RECT 0.600 562.680 879.000 564.080 ;
+        RECT 0.600 545.040 879.400 562.680 ;
+        RECT 0.600 543.640 879.000 545.040 ;
+        RECT 0.600 526.000 879.400 543.640 ;
+        RECT 0.600 524.600 879.000 526.000 ;
+        RECT 0.600 516.480 879.400 524.600 ;
+        RECT 1.000 515.080 879.400 516.480 ;
+        RECT 0.600 506.960 879.400 515.080 ;
+        RECT 0.600 505.560 879.000 506.960 ;
+        RECT 0.600 487.920 879.400 505.560 ;
+        RECT 0.600 486.520 879.000 487.920 ;
+        RECT 0.600 468.880 879.400 486.520 ;
+        RECT 0.600 467.480 879.000 468.880 ;
+        RECT 0.600 449.840 879.400 467.480 ;
+        RECT 0.600 448.440 879.000 449.840 ;
+        RECT 0.600 430.800 879.400 448.440 ;
+        RECT 0.600 429.400 879.000 430.800 ;
+        RECT 0.600 411.760 879.400 429.400 ;
+        RECT 0.600 410.360 879.000 411.760 ;
+        RECT 0.600 392.720 879.400 410.360 ;
+        RECT 0.600 391.320 879.000 392.720 ;
+        RECT 0.600 373.680 879.400 391.320 ;
+        RECT 0.600 372.280 879.000 373.680 ;
+        RECT 0.600 354.640 879.400 372.280 ;
+        RECT 0.600 353.240 879.000 354.640 ;
+        RECT 0.600 335.600 879.400 353.240 ;
+        RECT 0.600 334.200 879.000 335.600 ;
+        RECT 0.600 316.560 879.400 334.200 ;
+        RECT 0.600 315.160 879.000 316.560 ;
+        RECT 0.600 297.520 879.400 315.160 ;
+        RECT 0.600 296.120 879.000 297.520 ;
+        RECT 0.600 278.480 879.400 296.120 ;
+        RECT 0.600 277.080 879.000 278.480 ;
+        RECT 0.600 259.440 879.400 277.080 ;
+        RECT 0.600 258.040 879.000 259.440 ;
+        RECT 0.600 240.400 879.400 258.040 ;
+        RECT 0.600 239.000 879.000 240.400 ;
+        RECT 0.600 221.360 879.400 239.000 ;
+        RECT 0.600 219.960 879.000 221.360 ;
+        RECT 0.600 202.320 879.400 219.960 ;
+        RECT 0.600 200.920 879.000 202.320 ;
+        RECT 0.600 183.280 879.400 200.920 ;
+        RECT 0.600 181.880 879.000 183.280 ;
+        RECT 0.600 172.400 879.400 181.880 ;
+        RECT 1.000 171.000 879.400 172.400 ;
+        RECT 0.600 164.240 879.400 171.000 ;
+        RECT 0.600 162.840 879.000 164.240 ;
+        RECT 0.600 145.200 879.400 162.840 ;
+        RECT 0.600 143.800 879.000 145.200 ;
+        RECT 0.600 126.160 879.400 143.800 ;
+        RECT 0.600 124.760 879.000 126.160 ;
+        RECT 0.600 107.120 879.400 124.760 ;
+        RECT 0.600 105.720 879.000 107.120 ;
+        RECT 0.600 88.080 879.400 105.720 ;
+        RECT 0.600 86.680 879.000 88.080 ;
+        RECT 0.600 69.040 879.400 86.680 ;
+        RECT 0.600 67.640 879.000 69.040 ;
+        RECT 0.600 50.000 879.400 67.640 ;
+        RECT 0.600 48.600 879.000 50.000 ;
+        RECT 0.600 30.960 879.400 48.600 ;
+        RECT 0.600 29.560 879.000 30.960 ;
+        RECT 0.600 11.920 879.400 29.560 ;
+        RECT 0.600 10.520 879.000 11.920 ;
+        RECT 0.600 9.015 879.400 10.520 ;
+      LAYER met4 ;
+        RECT 6.735 10.240 20.640 1015.745 ;
+        RECT 23.040 10.240 23.940 1015.745 ;
+        RECT 26.340 10.240 174.240 1015.745 ;
+        RECT 176.640 10.240 177.540 1015.745 ;
+        RECT 179.940 10.240 327.840 1015.745 ;
+        RECT 330.240 10.240 331.140 1015.745 ;
+        RECT 333.540 10.240 481.440 1015.745 ;
+        RECT 483.840 10.240 484.740 1015.745 ;
+        RECT 487.140 10.240 635.040 1015.745 ;
+        RECT 637.440 10.240 638.340 1015.745 ;
+        RECT 640.740 10.240 788.640 1015.745 ;
+        RECT 791.040 10.240 791.940 1015.745 ;
+        RECT 794.340 10.240 869.105 1015.745 ;
+        RECT 6.735 9.015 869.105 10.240 ;
+  END
+END npu_project_macro
+END LIBRARY
+
