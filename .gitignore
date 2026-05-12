@@ -1,12 +1,9 @@
 # OpenLane run outputs
 Backend/openlane/runs/
+Backend/Old_openlane/runs/
 
 # logs
 *.log
-
-# reports
-*.rpt
-!Final_Submission_/**/*.rpt
 
 # temporary files
 tmp/
@@ -17,3 +14,8 @@ tmp/
 Backend/openlane/runs/
 Backend/openlane/synexp/
 Backend/openlane/synexp/
+
+Backend/Old_openlane/runs/
+Backend/Old_openlane/synexp/
+Backend/Old_openlane/synexp/
+
