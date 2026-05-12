@@ -52,9 +52,17 @@ module CU #(
     output logic sa_valid_in,
     output logic sa_transpose_en,
 
+    output logic                        bacc_wr_en,
+    output logic [$clog2(SA_SIZE)-1:0]  bacc_addr,
+
+    output logic ba_start,
+    input  logic ba_done,
+
     output logic                        bb_wr_en,
     output logic [$clog2(SA_SIZE)-1:0]  bb_wr_addr,
 
+    output logic       req_start,
+    input  logic       req_done,
     output logic [4:0] n_scale,
 
     output logic relu_start,
@@ -76,8 +84,8 @@ localparam LOAD_WGT     = 6'b000001;
 localparam LOAD_BIAS    = 6'b000010;
 localparam LOAD_SCL     = 6'b000011;
 localparam CONV         = 6'b000100;
-localparam ADD_BIAS     = 6'b000101; // Deprecated (Operator Fusion)
-localparam REQ_OP       = 6'b000110; // Deprecated (Operator Fusion)
+localparam ADD_BIAS     = 6'b000101;
+localparam REQ_OP       = 6'b000110;
 localparam RELU_OP      = 6'b000111;
 localparam POOL         = 6'b001000;
 localparam STORE_OP     = 6'b001001;
@@ -115,14 +123,13 @@ logic       bypass_bias;
 logic [4:0] ld_cnt;
 logic [SRAM_ADDR_W-1:0] ld_base_r_a, ld_base_r_b;  
 logic       ld_active;
-
 logic is_load_act, is_load_wgt, is_load_a_w, is_load_bias, is_load_scl, is_load_any;
 
 logic       wr_pend_r;
 logic [4:0] wr_addr_r;
-
 logic [SRAM_ADDR_W-1:0] st_tile_addr_r;            
 logic       st_buf_sel_r;
+logic [$clog2(SA_SIZE)-1:0] acc_wr_cnt;
 
 logic [CV_CNT_W-1:0] conv_cnt;
 logic conv_cnt_en, conv_cnt_rst;
@@ -135,19 +142,6 @@ logic st_active;
 state_t      state, next_state;
 conv_phase_t conv_phase, next_conv_phase;
 relu_phase_t relu_phase, next_relu_phase;
-
-// ── Pipeline Delay for Fused Datapath ────────────────────────────
-logic sa_done_d1, sa_done_d2;
-always_ff @(posedge clk or negedge rst_n) begin
-    if (!rst_n) begin
-        sa_done_d1 <= 1'b0;
-        sa_done_d2 <= 1'b0;
-    end else begin
-        sa_done_d1 <= sa_done;
-        sa_done_d2 <= sa_done_d1; // Wait 2 extra cycles for Bias & Req to finish
-    end
-end
-// ─────────────────────────────────────────────────────────────────
 
 always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n)              instr_r <= '0;
@@ -180,9 +174,9 @@ always_comb begin
         LOAD_ACT_WGT: unit_done = act_fill_done && wgt_fill_done;
         LOAD_BIAS:    unit_done = (ld_cnt >= SA_SIZE);   
         LOAD_SCL:     unit_done = (ld_cnt >= 5'd1);
-        CONV:         unit_done = sa_done_d2; // Fused Pipeline Done Check
-        ADD_BIAS:     unit_done = 1'b1;       // Deprecated (Passes instantly)
-        REQ_OP:       unit_done = 1'b1;       // Deprecated (Passes instantly)
+        CONV:         unit_done = sa_done;
+        ADD_BIAS:     unit_done = ba_done;
+        REQ_OP:       unit_done = req_done;
         RELU_OP:      unit_done = relu_done;
         STORE_OP:     unit_done = st_done;
         NOP:          unit_done = 1'b1;
@@ -259,7 +253,7 @@ always_ff @(posedge clk or negedge rst_n) begin
         ld_base_r_a <= '0;
         ld_base_r_b <= '0;
     end else if (state == DECODE && is_load_any) begin
-        ld_base_r_a <= tile_addr_a[SRAM_ADDR_W-1:0];
+        ld_base_r_a <= tile_addr_a[SRAM_ADDR_W-1:0]; 
         ld_base_r_b <= tile_addr_b[SRAM_ADDR_W-1:0];
     end
 end
@@ -278,7 +272,7 @@ always_ff @(posedge clk or negedge rst_n) begin
         wr_pend_r <= 1'b0;
         wr_addr_r <= '0;
     end else begin
-        wr_pend_r <= ld_active && (ld_cnt < SA_SIZE);
+        wr_pend_r <= ld_active && (ld_cnt < SA_SIZE);   
         wr_addr_r <= ld_cnt;
     end
 end
@@ -288,7 +282,7 @@ always_comb begin
     sram_a0  = '0;
     if (ld_active && is_load_act && (ld_cnt < SA_SIZE)) begin   
         sram_en0 = 1'b1;
-        sram_a0  = ld_base_r_a + ld_cnt;  
+        sram_a0  = ld_base_r_a + ld_cnt;  // YOSYS FIX: Removed cast
     end
 end
 
@@ -298,11 +292,11 @@ always_comb begin
     if (ld_active && (ld_cnt < SA_SIZE)) begin                  
         if (is_load_wgt) begin
             sram_en1 = 1'b1;
-            sram_a1  = is_load_a_w ? ld_base_r_b + ld_cnt       
-                                   : ld_base_r_a + ld_cnt;
+            sram_a1  = is_load_a_w ? ld_base_r_b + ld_cnt       // YOSYS FIX
+                                   : ld_base_r_a + ld_cnt;      // YOSYS FIX
         end else if (is_load_bias && (ld_cnt < SA_SIZE)) begin  
             sram_en1 = 1'b1;
-            sram_a1  = ld_base_r_a + ld_cnt;                    
+            sram_a1  = ld_base_r_a + ld_cnt;                    // YOSYS FIX
         end else if (is_load_scl && (ld_cnt == 5'd0)) begin
             sram_en1 = 1'b1;
             sram_a1  = ld_base_r_a;
@@ -372,7 +366,7 @@ always_comb begin
         CP_START: next_conv_phase = CP_LOAD_W;
         CP_LOAD_W: begin
             conv_cnt_en = 1'b1;
-            if (conv_cnt == (SA_SIZE - 1)) begin 
+            if (conv_cnt == (SA_SIZE - 1)) begin // YOSYS FIX: Removed cast
                 conv_cnt_rst    = 1'b1;
                 conv_cnt_en     = 1'b0;
                 next_conv_phase = CP_FEED_A;
@@ -380,7 +374,7 @@ always_comb begin
         end
         CP_FEED_A: begin
             conv_cnt_en = 1'b1;
-            if (conv_cnt == (SA_SIZE - 1)) begin 
+            if (conv_cnt == (SA_SIZE - 1)) begin // YOSYS FIX: Removed cast
                 conv_cnt_rst    = 1'b1;
                 conv_cnt_en     = 1'b0;
                 next_conv_phase = CP_WAIT;
@@ -399,8 +393,56 @@ assign sa_valid_in     = (conv_phase == CP_LOAD_W) || (conv_phase == CP_FEED_A);
 assign wgt_rd_row      = conv_cnt[N_ROW_PP-1:0];
 assign act_rd_row      = conv_cnt[N_ROW_PP-1:0];
 
+always_ff @(posedge clk or negedge rst_n) begin
+    if (!rst_n)
+        acc_wr_cnt <= '0;
+    else if (sa_valid_out)
+        acc_wr_cnt <= acc_wr_cnt + 1'b1;
+    else if (!sa_busy)
+        acc_wr_cnt <= '0;
+end
 
-// ── RELU LOGIC ────────────────────────────────────────────────────────
+assign bacc_wr_en = sa_valid_out;
+assign bacc_addr  = acc_wr_cnt;
+
+assign ba_start = exec_pulse && (opcode == ADD_BIAS);
+
+typedef enum logic [1:0] {
+    RQ_IDLE  = 2'd0, RQ_PULSE = 2'd1, RQ_WAIT  = 2'd2
+} req_phase_t;
+
+req_phase_t req_phase, next_req_phase;
+logic [$clog2(SA_SIZE)-1:0] req_cnt;
+
+always_ff @(posedge clk or negedge rst_n) begin
+    if (!rst_n) req_phase <= RQ_IDLE;
+    else        req_phase <= next_req_phase;
+end
+
+always_comb begin
+    next_req_phase = req_phase;
+    case (req_phase)
+        RQ_IDLE:  if (opcode == REQ_OP && state == EXECUTE)
+                      next_req_phase = RQ_PULSE;
+        RQ_PULSE: if (req_cnt == (SA_SIZE - 1))  // YOSYS FIX: Removed cast
+                      next_req_phase = RQ_WAIT;
+        RQ_WAIT:  if (req_done)
+                      next_req_phase = RQ_IDLE;
+        default:  next_req_phase = RQ_IDLE;
+    endcase
+end
+
+always_ff @(posedge clk or negedge rst_n) begin
+    if (!rst_n)
+        req_cnt <= '0;
+    else if (req_phase == RQ_IDLE)
+        req_cnt <= '0;
+    else if (req_phase == RQ_PULSE)
+        req_cnt <= req_cnt + 1'b1;
+end
+
+assign req_start = (req_phase == RQ_PULSE);
+
 always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n) relu_phase <= RP_IDLE;
     else        relu_phase <= next_relu_phase;
@@ -411,7 +453,7 @@ always_comb begin
     case (relu_phase)
         RP_IDLE:  if (opcode == RELU_OP && state == EXECUTE)
                       next_relu_phase = RP_PULSE;
-        RP_PULSE: if (relu_cnt == (SA_SIZE - 1)) 
+        RP_PULSE: if (relu_cnt == (SA_SIZE - 1))  // YOSYS FIX: Removed cast
                       next_relu_phase = RP_WAIT;
         RP_WAIT:  if (relu_done)
                       next_relu_phase = RP_IDLE;
@@ -430,13 +472,12 @@ end
 
 assign relu_start = (relu_phase == RP_PULSE);
 
-// ── STORE LOGIC ────────────────────────────────────────────────────────
 always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
         st_tile_addr_r <= '0;
         st_buf_sel_r   <= 1'b0;
     end else if (state == DECODE && (opcode == STORE_OP)) begin
-        st_tile_addr_r <= tile_addr_a[SRAM_ADDR_W-1:0];
+        st_tile_addr_r <= tile_addr_a[SRAM_ADDR_W-1:0];  
         st_buf_sel_r   <= buf_sel[0];
     end
 end

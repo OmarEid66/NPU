@@ -40,11 +40,12 @@ module npu_top #(
 
 localparam SRAM_BE_W   = SRAM_DATA_W / 8;   
 localparam INST_BE_W   = 4;
+
 localparam PP_ROWS      = SA_SIZE;                  
-localparam PP_COLS      = SA_SIZE;
+localparam PP_COLS      = SA_SIZE;                  
 localparam PP_WIDTH     = DATA_W;                   
 localparam PP_WR_DATA_W = SRAM_DATA_W;              
-localparam PP_WR_ADDR_W = 3;
+localparam PP_WR_ADDR_W = 3;                        
 localparam PP_RD_ROW_W  = $clog2(PP_ROWS);          
 localparam PP_RD_DATA_W = PP_COLS * PP_WIDTH;       
 
@@ -86,7 +87,7 @@ logic                    wgt_fill_done;
 logic                    wgt_active_bank;
 
 logic        imem_rd_wr;          
-logic        select_apb_npu;
+logic        select_apb_npu;      
 logic [1:0]  select_apb_npu_addr; 
 
 logic                   cu_sram_en0;
@@ -97,15 +98,32 @@ logic [SRAM_ADDR_W-1:0] cu_sram_a1;
 logic [INST_ADDR_W-1:0] PC;
 logic [INST_DATA_W-1:0] inst_data;
 logic                   inst_rd_en;
+
 logic                   addr_st_rel;
 
 logic scale_wr_en;
 logic [DATA_W_PATH-1:0] scale;
 
+logic                        bacc_wr_en;
+logic [$clog2(SA_SIZE)-1:0]  bacc_addr;
+logic [$clog2(SA_SIZE)-1:0]  acc_rd_addr;
+logic [SA_SIZE-1:0][DATA_W_PATH-1:0] acc_rd_data;
+
 logic                        bb_wr_en;
 logic [$clog2(SA_SIZE)-1:0]  bb_wr_addr;
 logic [SA_SIZE-1:0][DATA_W_PATH-1:0] bias;
 
+logic                        ba_start;
+logic                        ba_done;
+logic                        pb_wr_en;
+logic [$clog2(SA_SIZE)-1:0]  pb_wr_addr;
+logic [SA_SIZE-1:0][DATA_W_PATH-1:0] pb_wr_data;
+
+logic [$clog2(SA_SIZE)-1:0]  pb_rd_addr;
+logic [SA_SIZE-1:0][DATA_W_PATH-1:0] pb_rd_data;
+
+logic        req_start;
+logic        req_done;
 logic [4:0]  n_scale;
 logic                        preq_wr_en;
 logic [$clog2(SA_SIZE)-1:0]  preq_wr_addr;
@@ -144,17 +162,13 @@ logic                   sa_busy;
 logic                   sa_done;
 logic [SA_SIZE-1:0][DATA_W_PATH-1:0] psum_out;
 
-// Pipeline interconnects
-logic bias_adder_valid_out;
-logic [SA_SIZE-1:0][DATA_W_PATH-1:0] bias_added_data;
-
-
 assign inst_di0      = imem_wr_data;
 assign inst_data     = inst_do0;
 assign inst_we0 = load_imem ? imem_wr_we : 4'b0000;
 
 assign sram_en1 = cu_sram_en1;
 assign sram_a1  = cu_sram_a1;
+
 assign dmem_rd_data = sram_do0;
 
 genvar i;
@@ -221,17 +235,23 @@ CU #(
     .sa_valid_in      (sa_valid_in),
     .sa_transpose_en  (sa_transpose_en),
 
-    // ACC/PBias Ports Removed
+    .bacc_wr_en       (bacc_wr_en),
+    .bacc_addr        (bacc_addr),
+
+    .ba_start         (ba_start),
+    .ba_done          (ba_done),
 
     .bb_wr_en         (bb_wr_en),
     .bb_wr_addr       (bb_wr_addr),
 
+    .req_start        (req_start),
+    .req_done         (req_done),
     .n_scale          (n_scale),
 
     .relu_start       (relu_start),
     .relu_done        (relu_done),
 
-    .addr_st_rel      (addr_st_rel),
+    .addr_st_rel(addr_st_rel),
 
     .st_buf_sel       (st_buf_sel),
     .st_tile_addr     (st_tile_addr),
@@ -378,34 +398,54 @@ SA_NxN_top #(DATA_W, DATA_W_PATH, SA_SIZE) u_sa (
     .psum_out     (psum_out)
 );
 
-// ────────────────────────────────────────────────────────────
-// STREAMING PIPELINE: SA -> Bias -> Req
-// ────────────────────────────────────────────────────────────
+acc_buffer #(SA_SIZE, DATA_W_PATH) u_acc_buf (
+    .clk      (clk),
+    .rst_n    (rst_n),
+    .wr_en    (bacc_wr_en),
+    .wr_addr  (bacc_addr),
+    .wr_data  (psum_out),
+    .rd_addr  (acc_rd_addr),
+    .rd_data  (acc_rd_data)
+);
 
 bias_adder #(SA_SIZE, DATA_W_PATH) u_bias_adder (
     .clk          (clk),
     .rst_n        (rst_n),
-    .valid_in     (sa_valid_out),
-    .psum_in      (psum_out),
-    .bias_in      (bias),
-    .valid_out    (bias_adder_valid_out),
-    .data_out     (bias_added_data)
+    .start        (ba_start),
+    .done         (ba_done),
+    .busy         (),
+    .acc_rd_addr  (acc_rd_addr),
+    .acc_rd_data  (acc_rd_data),
+    .bias_rd_data (bias),
+    .pb_wr_en     (pb_wr_en),
+    .pb_wr_addr   (pb_wr_addr),
+    .pb_wr_data   (pb_wr_data)
+);
+
+pbias_buffer #(SA_SIZE, DATA_W_PATH) u_pbias_buf (
+    .clk     (clk),
+    .rst_n   (rst_n),
+    .wr_en   (pb_wr_en),
+    .wr_addr (pb_wr_addr),
+    .wr_data (pb_wr_data),
+    .rd_addr (pb_rd_addr),
+    .rd_data (pb_rd_data)
 );
 
 req_unit #(SA_SIZE, DATA_W_PATH, C_WIDTH) u_req (
     .clk          (clk),
     .rst_n        (rst_n),
-    .start        (sa_start),
-    .valid_in     (bias_adder_valid_out),
-    .data_in      (bias_added_data),
-    .b            (scale),
-    .c            (n_scale),
-    .valid_out    (preq_wr_en),
+    .start        (req_start),
+    .done         (req_done),
+    .busy         (),
+    .b            (scale),      
+    .c            (n_scale),    
+    .pb_rd_addr   (pb_rd_addr),
+    .pb_rd_data   (pb_rd_data),
+    .preq_wr_en   (preq_wr_en),
     .preq_wr_addr (preq_wr_addr),
-    .data_out     (preq_wr_data)
+    .preq_wr_data (preq_wr_data)
 );
-
-// ────────────────────────────────────────────────────────────
 
 preq_buffer #(SA_SIZE) u_preq_buf (
     .clk     (clk),
@@ -441,10 +481,10 @@ relu_buffer #(SA_SIZE, DATA_W) u_relu_buf (
 );
 
 mux2x1 #($clog2(SA_SIZE)) mux_to_rd_addr (
-    .a(preq_rd_addr_rel),
-    .b(preq_rd_addr_st),
-    .sel(addr_st_rel),
-    .y(preq_rd_addr)
+.a(preq_rd_addr_rel),
+.b(preq_rd_addr_st),
+.sel(addr_st_rel),
+.y(preq_rd_addr)
 );
 
 store_engine #(
