@@ -1,0 +1,21 @@
+# OpenLane run outputs
+Backend/openlane/runs/
+Backend/Old_openlane/runs/
+
+# logs
+*.log
+
+# temporary files
+tmp/
+*.tmp
+
+# libraries generated during runs
+
+Backend/openlane/runs/
+Backend/openlane/synexp/
+Backend/openlane/synexp/
+
+Backend/Old_openlane/runs/
+Backend/Old_openlane/synexp/
+Backend/Old_openlane/synexp/
+

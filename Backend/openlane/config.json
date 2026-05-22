@@ -1,0 +1,67 @@
+{
+    "//": "================================================================",
+    "//": " project_macro — config.json",
+    "//": "================================================================",
+
+    "//": "=== USER SECTION — Edit the parameters below for your design ===",
+
+    "//": "--- Verilog source files ---",
+    "//": "Add your own RTL files before project_macro.v.",
+    
+    "VERILOG_FILES": [
+        "dir::RTL/*.v",
+        "dir::RTL/*.sv",
+        "dir::RTL/*.SV"
+    ],
+
+    "//": "--- Clock period (ns) — set based on your target frequency ---",
+    "CLOCK_PERIOD": 50,
+    
+    "//": "--- Timing constraint files ---",
+    "PNR_SDC_FILE": "dir::pnr.sdc",
+    "SIGNOFF_SDC_FILE": "dir::signoff.sdc",
+    "FP_CORE_UTIL": 20,
+    
+    "SYNTH_STRATEGY": "AREA 2",
+    "DEFAULT_CORNER": "max_ss_100C_1v60",
+    "RUN_POST_GRT_DESIGN_REPAIR": true,
+    "DESIGN_REPAIR_MAX_SLEW_PCT": 30,
+    "DESIGN_REPAIR_MAX_CAP_PCT": 30,
+    
+    "GRT_ANTENNA_REPAIR_ITERS": 15,
+    "GRT_ANTENNA_REPAIR_MARGIN": 10,
+    "DIODE_ON_PORTS": "in",
+    
+    "meta": {
+        "flow": "Classic",
+        "substituting_steps": {
+            "+OpenROAD.DetailedRouting": "Odb.InsertECOBuffers",
+            "+Odb.InsertECOBuffers": "OpenROAD.DetailedRouting"
+        }
+    },
+    
+    "INSERT_ECO_BUFFERS": [
+        { "target": "_89776_/Y",          "buffer": "sky130_fd_sc_hd__buf_4" },
+        { "target": "ANTENNA_118/DIODE",          "buffer": "sky130_fd_sc_hd__buf_4" },
+        { "target": "fanout380/A",          "buffer": "sky130_fd_sc_hd__buf_4" },
+        { "target": "_89281_/Y",          "buffer": "sky130_fd_sc_hd__buf_4" }
+   
+        
+    ],
+
+    "//": "=================================================================",
+    "//": " FIXED SECTION — do NOT edit anything below this line",
+    "//": " These values define the physical contract with the multi-project",
+    "//": " chip. Changing any of them will break top-level integration.",
+    "//": "=================================================================",
+
+    "DESIGN_NAME": "npu_project_macro",
+    "FP_SIZING": "absolute",
+    "DIE_AREA": [0, 0, 880, 1031.66],
+    "FP_DEF_TEMPLATE": "dir::fixed_dont_change/project_macro.def",
+    "VDD_NETS": ["vccd1"],
+    "GND_NETS": ["vssd1"],
+    "CLOCK_PORT": "clk",
+    "RT_MAX_LAYER": "met4",
+    "PDN_MULTILAYER": false
+}
