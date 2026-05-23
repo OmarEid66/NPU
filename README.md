@@ -76,7 +76,9 @@ Although the primary validation application is **chest X-ray pneumonia classific
 
 ### Top-Level Block Diagram
 
-<!-- PHOTO: Use Image 1 (the RTL schematic from your EDA tool) here, or the architecture diagram from the README header render -->
+<img width="1214" height="526" alt="Image" src="https://github.com/user-attachments/assets/4493a72f-bcf2-4982-a628-729506c8af68" />
+
+<img width="1886" height="891" alt="Image" src="https://github.com/user-attachments/assets/f8b87375-acea-4a00-a7e6-cb41552c289d" />
 
 The nanoNPU is organized around a linear streaming datapath. The host communicates with the chip over a UART link that is bridged to an internal APB bus. An APB decoder fans out to the NPU core, instruction memory, and data SRAM:
 
@@ -145,7 +147,7 @@ SRAM ──[LOAD_SCL]──► scale_reg ───► Req Unit  (×M0 >> n, INT8
 
 ### Instruction Set Architecture (ISA)
 
-<!-- PHOTO: Use Image 2 (the ISA table photograph) here -->
+> This ISA is Fully made by the team
 
 All NPU operations are encoded in a **32-bit fixed-width instruction** format. Two instruction layouts exist:
 
@@ -208,7 +210,14 @@ This sub-FSM first loads weights into the systolic array column-by-column (`CP_L
 
 The full RTL-to-GDSII flow was executed using **LibreLane / OpenLane** targeting the **SkyWater SKY130 HD standard cell library**.
 
-<!-- PHOTO: Insert the GDSII layout render (Final_Submission/final/render/npu_project_macro.png) here -->
+### Layout
+<img width="661" height="759" alt="Image" src="https://github.com/user-attachments/assets/fb587a36-07ea-4478-9039-d506feadaec0" />
+
+### Placement Density 
+<img width="662" height="758" alt="Image" src="https://github.com/user-attachments/assets/3a58ab32-51ce-49c7-a4b0-6c9dc76578d7" />
+
+### Routing Congestion
+<img width="679" height="768" alt="Image" src="https://github.com/user-attachments/assets/2ece5a96-b18f-4e3c-8e56-48b8f4b248c2" />
 
 ### Flow Configuration Highlights (`config.json`)
 
@@ -224,17 +233,15 @@ The full RTL-to-GDSII flow was executed using **LibreLane / OpenLane** targeting
 
 ### Signoff Summary
 
-Post-route signoff was performed at the worst-case slow corner (`max_ss_100C_1v60`). Full STA reports, DRC/LVS sign-off logs, and SPEF parasitic files are available in `Final_Submission/`.
+Post-route signoff was performed at the worst-case slow corner (`max_ss_100C_1v60`). Full STA reports, DRC/LVS sign-off logs, and SPEF parasitic files are available in `Final/`.
 
-<!-- PHOTO: Insert a screenshot of the KLayout GDS view (klayout_gds/npu_project_macro.klayout.gds rendered as PNG) here -->
+<img width="890" height="1042" alt="Image" src="https://github.com/user-attachments/assets/79c7e749-01a3-480e-8a44-70f413f2517c" />
 
 ---
 
 ## Application: Chest X-Ray Pneumonia Detection
 
 The primary validation use case for nanoNPU is a **binary CNN classifier** distinguishing normal chest X-rays from pneumonia cases, derived from the publicly available Guangzhou Women and Children's Medical Center dataset.
-
-<!-- PHOTO: Insert a representative grid showing Normal vs Bacterial vs Viral pneumonia X-ray examples from your dataset -->
 
 ### Dataset
 
@@ -254,7 +261,7 @@ A bit-accurate Python model of the inference pipeline (including INT8 quantizati
 
 👉 [**Open in Google Colab**](https://colab.research.google.com/drive/1guw0ahCD6iGF00_8kZn-vLknWel7jAV5?usp=sharing)
 
-<!-- PHOTO: Insert a confusion matrix or accuracy/loss training curves from your Jupyter notebook (Chest_X_Ray_Images_CNN.ipynb) here -->
+<img width="684" height="520" alt="Image" src="https://github.com/user-attachments/assets/cd987e77-f8b3-4c2e-87d9-dfd1635d449d" />
 
 The notebook (`Chest_X_Ray_Images_CNN.ipynb`) covers:
 - Data loading & preprocessing
@@ -275,7 +282,7 @@ The notebook (`Chest_X_Ray_Images_CNN.ipynb`) covers:
 │       ├── signoff.sdc           # Final signoff timing constraints
 │       └── fixed_dont_change/    # Fixed DEF template (multi-project contract)
 │
-├── Final_Submission/             # Post-route tapeout deliverables
+├── Final/             # Post-route tapeout deliverables
 │   ├── final/
 │   │   ├── gds/                  # npu_project_macro.gds  ← manufacturing-ready
 │   │   ├── lef/                  # Macro abstract view
@@ -413,7 +420,7 @@ Full reports: `Final_Submission/drc.magic.rpt`, `Final_Submission/lvs.netgen.rpt
 ---
 
 <p align="center">
-  Made with ❤️ at the <strong>American University in Cairo</strong> · Silicon Sprint 2026
+  Made at the <strong>American University in Cairo</strong> · Silicon Sprint 2026
   <br/>
   Apache 2.0 License — see <a href="LICENSE">LICENSE</a>
 </p>
