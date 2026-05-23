@@ -264,9 +264,8 @@ Post-route signoff was performed at the worst-case slow corner (`max_ss_100C_1v6
 
 | Check | Result | Detail |
 |---|---|---|
-| Setup Timing | ✅ Clean | Zero violations across all 9 PVT corners |
-| Hold Timing | ✅ Clean | Zero violations across all 9 PVT corners |
-| Max Slew / Cap | ✅ Resolved | ECO buf_4 insertion cleared overloaded nets |
+| Setup Timing | ✅ Clean | Zero violations  |
+| Hold Timing | ✅ Clean | Zero violations  |
 | IR Drop (VPWR) | ✅ 0.05% | Well within < 2% signoff budget |
 | IR Drop (VGND) | ✅ 0.05% | Well within < 2% signoff budget |
 | DRC | ✅ 0 violations | SkyWater 130nm rule deck — Magic & KLayout |
@@ -508,8 +507,8 @@ All signoff artifacts are under `Final/`. Key results at worst-case corner (`max
 | Technology | SkyWater SKY130 130nm |
 | Die Area | 880 × 1031.66 µm |
 | Clock Frequency | 20 MHz |
-| Setup WNS (worst corner) | +0.97 ns |
-| Hold WNS (worst corner) | +0.13 ns |
+| Setup WNS (worst corner) | +0.0952 ns |
+| Hold WNS (worst corner) | +9.0258 ns |
 | IR Drop VPWR / VGND | 0.05% / 0.05% |
 | DRC | ✅ 0 violations |
 | LVS | ✅ Circuits match uniquely |
