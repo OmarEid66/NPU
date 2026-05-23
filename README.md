@@ -555,6 +555,8 @@ Full reports: `Final/drc.magic.rpt`, `Final/lvs.netgen.rpt`, `Final/sta_summary.
 - Kermany, D. et al. (2018). *Identifying Medical Diagnoses and Treatable Diseases by Image-Based Deep Learning.* Cell, 172(5), 1122–1131.
   [https://doi.org/10.1016/j.cell.2018.02.010](http://www.cell.com/cell/fulltext/S0092-8674(18)30154-5)
   Dataset: [https://data.mendeley.com/datasets/rscbjbr9sj/2](https://data.mendeley.com/datasets/rscbjbr9sj/2) — CC BY 4.0
+  
+- [Chest X-Ray Images (Pneumonia)](https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia)
 
 ### Tools & PDK
 
