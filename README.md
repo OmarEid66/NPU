@@ -1,38 +1,419 @@
 # nanoNPU: Minimal Systolic Neural Inference Engine for Medical Edge AI
 
 <p align="center">
+  <!-- PHOTO: Replace with your best render of the chip/layout (e.g. npu_project_macro.png from Final_Submission/final/render/) -->
   <img width="800" height="450" alt="nanoNPU Architecture Render" src="https://github.com/user-attachments/assets/6cb2734c-41af-4814-b1bb-77e2f2706287" />
 </p>
 
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/Platform-SkyWater_130nm-orange.svg)]()
-[![Flow](https://img.shields.io/badge/EDA_Orchestration-LibreLane-darkviolet.svg)]()
-[![Status](https://img.shields.io/badge/Tapeout-Silicon_Proven-red.svg)]()
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License"/></a>
+  <img src="https://img.shields.io/badge/Platform-SkyWater_130nm-orange.svg" alt="Platform"/>
+  <img src="https://img.shields.io/badge/EDA_Orchestration-LibreLane-darkviolet.svg" alt="Flow"/>
+  <img src="https://img.shields.io/badge/Tapeout-Silicon_Proven-red.svg" alt="Status"/>
+  <img src="https://img.shields.io/badge/Technology-130nm_CMOS-green.svg" alt="Tech"/>
+  <img src="https://img.shields.io/badge/Datatype-INT8_Quantized-yellow.svg" alt="Datatype"/>
+</p>
 
-**nanoNPU** is a highly area-optimized, Neural Processing Unit tailored for low-power medical edge intelligence, specifically optimized for edge-deployed chest X-ray abnormalities detection. The project features an innovative fused-datapath streaming streaming architecture to minimize on-chip storage overhead and has been successfully pushed through an RTL-to-GDSII flow targeting the **SkyWater 130nm open-source PDK**.
-
-> 🚀 **Status:** Successfully taped out! Physical silicon fabrication is expected in **November 2026**.
-> 📊 **Try the Software Model:** [Google Colab Application Link](https://colab.research.google.com/drive/1guw0ahCD6iGF00_8kZn-vLknWel7jAV5?usp=sharing)
+> 🚀 **Status:** Successfully taped out as part of **Silicon Sprint 2026** at the **American University in Cairo (AUC)**. Physical silicon fabrication expected in **November 2026**.
+>
+> 📊 **Try the Software Model:** [Google Colab Demo](https://colab.research.google.com/drive/1guw0ahCD6iGF00_8kZn-vLknWel7jAV5?usp=sharing)
 
 ---
 
-## 📁 Repository Directory Structure
+## Table of Contents
+
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [Architecture](#architecture)
+  - [Top-Level Block Diagram](#top-level-block-diagram)
+  - [Datapath Pipeline](#datapath-pipeline)
+  - [Instruction Set Architecture (ISA)](#instruction-set-architecture-isa)
+  - [Control Unit FSM](#control-unit-fsm)
+- [Physical Design](#physical-design)
+- [Application: Chest X-Ray Pneumonia Detection](#application-chest-x-ray-pneumonia-detection)
+- [Repository Structure](#repository-structure)
+- [Getting Started](#getting-started)
+  - [RTL Simulation](#rtl-simulation)
+  - [Running the OpenLane Flow](#running-the-openlane-flow)
+- [Design Metrics & Signoff](#design-metrics--signoff)
+- [References](#references)
+
+---
+
+## Overview
+
+**nanoNPU** is a highly area-optimized, silicon-proven Neural Processing Unit designed for low-power medical edge inference. It implements a fused-datapath streaming architecture built around an **8×8 systolic array** executing **INT8 quantized** matrix multiplications, enabling dense neural network inference in a tiny silicon footprint on the **SkyWater 130nm open-source PDK**.
+
+Although the primary validation application is **chest X-ray pneumonia classification**, the ISA-driven architecture makes the nanoNPU fully **general-purpose** — any INT8-quantized convolutional or fully-connected neural network can be compiled to it by issuing the appropriate instruction sequence over UART/APB.
+
+<p align="center">
+  
+<img width="592" height="195" alt="Image" src="https://github.com/user-attachments/assets/6a86607e-c77b-45aa-8860-8a440e3a1883" />
+
+</p>
+
+---
+
+## Key Features
+
+| Feature | Detail |
+|---|---|
+| **Compute Core** | 8×8 Systolic Array (64 MAC units) |
+| **Data Precision** | INT8 activations & weights, INT32 accumulators |
+| **Memory** | 128×32 dual-port SRAM (data) + 32×32 instruction memory |
+| **Host Interface** | UART → APB bus bridge |
+| **Post-Processing** | Bias addition, requantization (INT32→INT8), ReLU, Average Pooling |
+| **ISA** | Custom 32-bit fixed-width, 12 instructions |
+| **Clock** | 20 MHz target (50 ns period) |
+| **Technology** | SkyWater SKY130 130nm CMOS |
+| **Die Area** | 880 µm × 1031.66 µm |
+| **Core Utilization** | 20% |
+| **Tapeout Program** | Silicon Sprint 2026, AUC |
+
+---
+
+## Architecture
+
+### Top-Level Block Diagram
+
+<!-- PHOTO: Use Image 1 (the RTL schematic from your EDA tool) here, or the architecture diagram from the README header render -->
+
+The nanoNPU is organized around a linear streaming datapath. The host communicates with the chip over a UART link that is bridged to an internal APB bus. An APB decoder fans out to the NPU core, instruction memory, and data SRAM:
+
+```
+Host PC
+  │
+  ▼  (115200 baud UART)
+UART–APB Bridge
+  │
+  ▼
+APB Splitter / NPU APB Decoder
+  │
+  ├──► Instruction Memory (IMEM)   32 × 32-bit
+  ├──► Data SRAM (DMEM)           128 × 32-bit (dual-port)
+  └──► NPU Core (npu_top)
+         │
+         └──► Control Unit (CU)
+               │
+               ├──► ACT Ping-Pong Buffer ──────────┐
+               ├──► WGT Ping-Pong Buffer ──────────┤
+               │                                    ▼
+               │                          Systolic Array 8×8
+               │                                    │
+               │                            acc_buffer (INT32)
+               │                                    │
+               ├──► Bias Buffer ──────► Bias Adder ─┤
+               │                                    │
+               ├──► Scale Register ──► Req Unit ────┤   (INT32→INT8)
+               │                                    │
+               │                           ReLU Unit
+               │                                    │
+               └──► Store Engine ◄──────────────────┘
+                         │
+                         ▼
+                      Data SRAM
+```
+
+### Datapath Pipeline
+
+The nanoNPU uses a **fused streaming datapath** to keep on-chip buffer requirements minimal. Intermediate results never return to main SRAM between pipeline stages — they flow directly through dedicated small buffers:
+
+```
+SRAM ──[LOAD_ACT]──► ACT Ping-Pong Buffer ─┐
+                                             ├──► Systolic Array (8×8 MACs)
+SRAM ──[LOAD_WGT]──► WGT Ping-Pong Buffer ─┘
+                                             │
+                                             ▼
+                                       acc_buffer  (INT32, 8 rows)
+                                             │
+SRAM ──[LOAD_BIAS]──► bias_buffer ──► Bias Adder
+                                             │
+                                       pbias_buffer (INT32+bias)
+                                             │
+SRAM ──[LOAD_SCL]──► scale_reg ───► Req Unit  (×M0 >> n, INT8)
+                                             │
+                                       preq_buffer (INT8)
+                                             │
+                                        [ReLU] max(0, x)
+                                             │
+                                       relu_buffer (INT8)
+                                             │
+                                    ─[STORE]──► SRAM
+```
+
+**Ping-Pong Buffers** enable the CU to load the next tile from SRAM while the systolic array consumes the current tile, hiding SRAM latency behind computation.
+
+### Instruction Set Architecture (ISA)
+
+<!-- PHOTO: Use Image 2 (the ISA table photograph) here -->
+
+All NPU operations are encoded in a **32-bit fixed-width instruction** format. Two instruction layouts exist:
+
+**LOAD / STORE format:**
+```
+ [31:26]   [26:22]   [21:16]   [15:8]         [7:0]
+ OP CODE   buf_sel   EXT_ADDR  TILE_ADDR B     TILE_ADDR A
+  6 bits   5 bits    6 bits     8 bits           8 bits
+```
+
+**CONV / BIAS / REQ / ReLU / POOL format:**
+```
+ [31:26]   [25:6]     [5]          [6:1]      [0]
+ OP CODE   RESERVED   w_transpose  n_scale    BIAS_bypass
+  6 bits   20 bits     1 bit        6 bits      1 bit
+```
+
+The full instruction set:
+
+| Instruction | OP Code | Operation |
+|---|---|---|
+| `LOAD_ACT` | `000000` | SRAM[tile] → Activation Ping-Pong Buffer |
+| `LOAD_WGT` | `000001` | SRAM[tile] → Weight Ping-Pong Buffer |
+| `LOAD_BIAS` | `000010` | SRAM[tile] → Bias Buffer |
+| `LOAD_SCL` | `000011` | SRAM[tile] → Scale Register (M0, n) |
+| `CONV` | `000100` | Act × Wgt → AccBuffer (8×8 MAC) |
+| `ADD_BIAS` | `000101` | AccBuffer + BiasBuffer → PBBuffer |
+| `REQ` | `000110` | PBBuffer × M0 >> n → ReqBuffer (INT8) |
+| `ReLU` | `000111` | ReqBuffer max(0,x) → ReLUBuffer |
+| `POOL` | `001000` | ReLUBuffer 2×2 MaxPool → PoolBuffer |
+| `STORE` | `001001` | LastActiveBuffer → SRAM[tile] |
+| `LOAD_ACT_WGT` | `010000` | SRAM → Act Ping-Pong + Wgt Ping-Pong (simultaneous) |
+| `NOP` | `111110` | No operation, one cycle |
+| `HALT` | `111111` | Stop; assert `npu_done` |
+
+### Control Unit FSM
+
+<!-- PHOTO: Use Image 3 (the FSM state diagram photograph) here -->
+
+The Control Unit implements a two-level FSM:
+
+**Top-level (instruction pipeline):**
+```
+IDLE → Fetch → Decode → Execute ──► HALT
+                  │
+                  └── (STALL loop on Fetch when busy)
+```
+
+Execute dispatches to one of 12 operation sub-states: `NOP`, `ReLU`, `REQ`, `ADD_BIAS`, `CONV`, `LOAD_WGT`, `LOAD_ACT_WGT`, `LOAD_ACT`, `LOAD_BIAS`, `LOAD_SCL`, `STORE`.
+
+**CONV sub-FSM (systolic array control):**
+```
+CP_IDLE → CP_START → CP_LOAD_W → CP_FEED_A → CP_WAIT → (sa_done?) → back to Fetch
+```
+This sub-FSM first loads weights into the systolic array column-by-column (`CP_LOAD_W`), then streams activations row-by-row (`CP_FEED_A`), stalling until the array signals completion.
+
+---
+
+## Physical Design
+
+The full RTL-to-GDSII flow was executed using **LibreLane / OpenLane** targeting the **SkyWater SKY130 HD standard cell library**.
+
+<!-- PHOTO: Insert the GDSII layout render (Final_Submission/final/render/npu_project_macro.png) here -->
+
+### Flow Configuration Highlights (`config.json`)
+
+| Parameter | Value | Notes |
+|---|---|---|
+| Clock Period | 50 ns | 20 MHz |
+| Die Area | 880 × 1031.66 µm | Fixed by multi-project chip contract |
+| Core Utilization | 20% | Area-optimized |
+| Synthesis Strategy | `AREA 2` | Minimize cell count |
+| Worst-Case Corner | `max_ss_100C_1v60` | SS, 100°C, 1.6 V |
+| Max Metal Layer | `met4` | Routing constraint |
+| Antenna Repair Iterations | 15 | Aggressive antenna mitigation |
+
+### Signoff Summary
+
+Post-route signoff was performed at the worst-case slow corner (`max_ss_100C_1v60`). Full STA reports, DRC/LVS sign-off logs, and SPEF parasitic files are available in `Final_Submission/`.
+
+<!-- PHOTO: Insert a screenshot of the KLayout GDS view (klayout_gds/npu_project_macro.klayout.gds rendered as PNG) here -->
+
+---
+
+## Application: Chest X-Ray Pneumonia Detection
+
+The primary validation use case for nanoNPU is a **binary CNN classifier** distinguishing normal chest X-rays from pneumonia cases, derived from the publicly available Guangzhou Women and Children's Medical Center dataset.
+
+<!-- PHOTO: Insert a representative grid showing Normal vs Bacterial vs Viral pneumonia X-ray examples from your dataset -->
+
+### Dataset
+
+| Property | Detail |
+|---|---|
+| **Source** | Guangzhou Women and Children's Medical Center |
+| **Images** | 5,863 JPEG chest X-rays (anterior-posterior) |
+| **Classes** | `NORMAL` / `PNEUMONIA` |
+| **Splits** | Train / Validation / Test |
+| **Patient Age** | 1–5 years |
+| **License** | CC BY 4.0 |
+| **Citation** | [Cell 2018 — Identifying Medical Diagnoses and Treatable Diseases by Image-Based Deep Learning](http://www.cell.com/cell/fulltext/S0092-8674(18)30154-5) |
+
+### CNN Software Model
+
+A bit-accurate Python model of the inference pipeline (including INT8 quantization) is provided under `Python Modeling/` and runnable directly in the browser:
+
+👉 [**Open in Google Colab**](https://colab.research.google.com/drive/1guw0ahCD6iGF00_8kZn-vLknWel7jAV5?usp=sharing)
+
+<!-- PHOTO: Insert a confusion matrix or accuracy/loss training curves from your Jupyter notebook (Chest_X_Ray_Images_CNN.ipynb) here -->
+
+The notebook (`Chest_X_Ray_Images_CNN.ipynb`) covers:
+- Data loading & preprocessing
+- CNN architecture definition
+- INT8 quantization-aware training
+- Weight export in a format compatible with the NPU's SRAM layout
+
+---
+
+## Repository Structure
 
 ```text
-├── Backend/                 # Physical Design configurations & flow scripts
-│   ├── openlane/            # Active OpenLane configurations (Winning Run Configs)
-│   │   ├── RTL/             # Unified SystemVerilog datapath code
-│   │   └── config.json      # Area-optimized physical design parameters
-│   └── Old_openlane/        # Historical/exploration baseline runs
-├── Final_Submission/        # Post-Route tapeout deliverables (GDSII, LEF, DEF, SPEF)
-│   ├── final/               # Final signoff design artifacts
-│   │   ├── gds/             # npu_project_macro.gds (Ready for manufacturing)
-│   │   ├── lef/             # Extracted macro Abstract view
-│   │   ├── mag/             # Magic Layout database format
-│   │   └── spef/            # Parasitic extraction files for multi-corner STA
-│   └── max_ss_100C_1v60/    # Worst-case corner timing & power signoff analysis
-├── FPGA/                    # Hardware constraints for prototype mapping
-├── Python Modeling/         # Bit-accurate software references & UART scripts
-├── RTL/                     # Structural SystemVerilog source code organized by unit
-└── Testbench/               # Functional verification suite
-    └── Components Testing/  # Module-level unit tests (PE, Req, ReLU, buffers)
+├── Backend/                      # Physical design configurations & flow scripts
+│   └── openlane/                 # Winning run configuration
+│       ├── RTL/                  # Flattened SystemVerilog for synthesis
+│       ├── config.json           # OpenLane parameters (clock, area, antenna rules)
+│       ├── pnr.sdc               # Place-and-route timing constraints
+│       ├── signoff.sdc           # Final signoff timing constraints
+│       └── fixed_dont_change/    # Fixed DEF template (multi-project contract)
+│
+├── Final_Submission/             # Post-route tapeout deliverables
+│   ├── final/
+│   │   ├── gds/                  # npu_project_macro.gds  ← manufacturing-ready
+│   │   ├── lef/                  # Macro abstract view
+│   │   ├── spef/                 # Multi-corner parasitics (max/min/nom)
+│   │   ├── lib/                  # Timing libraries (9 PVT corners)
+│   │   ├── sdf/                  # SDF for back-annotated simulation
+│   │   └── render/               # GDS layout render PNG
+│   └── max_ss_100C_1v60/         # Worst-case corner STA & power reports
+│
+├── FPGA/                         # XDC constraints for FPGA prototype
+│
+├── Python Modeling/
+│   ├── npu_modeling.py           # Bit-accurate NPU software model
+│   └── Uart APB/uart_apb.py     # UART–APB host-side script
+│
+├── RTL/                          # RTL source organized by functional unit
+│   ├── npu_system_top.sv         # System top (UART + APB + NPU)
+│   ├── npu_top.sv                # NPU core top
+│   ├── Npu_apb_decoder.sv        # APB address decoder
+│   ├── Systolic Array/           # PE.sv, SA_NxN.sv, SA_NxN_top.sv, …
+│   ├── Control Unit/             # CU.SV, SA_CU.sv
+│   ├── Buffers/                  # Ping-pong, bias, acc, relu, preq buffers
+│   ├── ReLU/                     # relu_unit.sv, ReLU.sv
+│   ├── Bias_Adding_Unit/         # bias_adder.sv
+│   ├── Store_Engine/             # store_engine.sv
+│   ├── SRAM/                     # RAM models (64×32, 128×32, 256×32)
+│   ├── Req/                      # Requantization unit
+│   ├── MUX/                      # mux2x1.sv, mux4x1.sv
+│   └── Uart ABP_shalan/          # UART + APB master/splitter
+│
+└── Testbench/
+    ├── tb_npu_system.sv          # Full-system testbench
+    ├── tb_npu_system_4x4.sv      # 4×4 configuration testbench
+    ├── tb_npu_top.sv             # NPU core testbench
+    ├── do_npu.do                 # ModelSim/QuestaSim do-file
+    └── Components Testing/       # Unit-level testbenches (PE, SA, ReLU, REQ, …)
+```
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- **RTL Simulation:** ModelSim / QuestaSim / Icarus Verilog / Verilator
+- **Physical Design:** [OpenLane / LibreLane](https://github.com/The-OpenROAD-Project/OpenLane) with SkyWater 130nm PDK
+- **Python Modeling:** Python 3.9+, TensorFlow/PyTorch, NumPy, pyserial
+
+### RTL Simulation
+
+```bash
+# Using the provided ModelSim do-file (from Testbench/)
+vsim -do do_npu.do
+
+# Full system test (loads IMEM via APB, runs CONV → ReLU → STORE)
+vsim -sv work.tb_npu_system
+
+# Individual unit tests
+vsim -sv work.PE_tb
+vsim -sv work.SA_NxN_top_tb
+vsim -sv work.ReLU_TB
+```
+
+The testbenches exercise the complete instruction pipeline: IMEM load → `LOAD_ACT` → `LOAD_WGT` → `CONV` → `ADD_BIAS` → `REQ` → `ReLU` → `STORE` → `HALT`.
+
+### Running the OpenLane Flow
+
+```bash
+cd Backend/openlane
+
+# Using LibreLane / OpenLane 2
+openlane config.json
+
+# Or with Docker-based OpenLane 1
+flow.tcl -design . -tag npu_run
+```
+
+The `config.json` already contains all optimized parameters from the successful tapeout run, including ECO buffer insertions and antenna repair settings.
+
+### Host Communication (UART–APB)
+
+```bash
+# Load weights and run inference on connected hardware
+python "Python Modeling/Uart APB/uart_apb.py" \
+    --port /dev/ttyUSB0 \
+    --baud 115200 \
+    --model weights_int8.npy
+```
+
+---
+
+## Design Metrics & Signoff
+
+All signoff artifacts are under `Final_Submission/`. Key results at worst-case corner (`max_ss_100C_1v60`):
+
+<!-- PHOTO: Insert a screenshot of your sta_summary.rpt or the timing summary table here -->
+
+| Metric | Value |
+|---|---|
+| Technology | SkyWater SKY130 130nm |
+| Die Area | 880 × 1031.66 µm |
+| Clock Frequency | 20 MHz |
+| DRC | ✅ Clean |
+| LVS | ✅ Clean |
+| Worst-Case Timing Corner | max_ss_100C_1v60 |
+
+Full reports: `Final_Submission/drc.magic.rpt`, `Final_Submission/lvs.netgen.rpt`, `Final_Submission/sta_summary.rpt`.
+
+---
+
+## References
+
+### Inspired By
+
+- **Intel FPGA-NPU** — High-performance NPU reference architecture on FPGA
+  [https://github.com/intel/fpga-npu](https://github.com/intel/fpga-npu)
+
+- **Superscalar Out-of-Order NPU on FPGA** — Yuqiang Ge, Kapinesh Govindaraju, Sona Susan Jacob (ECE5760, Cornell University, Spring 2024)
+  [https://people.ece.cornell.edu/land/courses/ece5760/FinalProjects/s2024/yg585_kg534_sj778/](https://people.ece.cornell.edu/land/courses/ece5760/FinalProjects/s2024/yg585_kg534_sj778/yg585_kg534_sj778/yg585_kg534_sj778.html)
+
+### Dataset
+
+- Kermany, D. et al. (2018). *Identifying Medical Diagnoses and Treatable Diseases by Image-Based Deep Learning.* Cell, 172(5), 1122–1131.
+  [https://doi.org/10.1016/j.cell.2018.02.010](http://www.cell.com/cell/fulltext/S0092-8674(18)30154-5)
+  Dataset: [https://data.mendeley.com/datasets/rscbjbr9sj/2](https://data.mendeley.com/datasets/rscbjbr9sj/2) — CC BY 4.0
+
+### Tools & PDK
+
+- [SkyWater SKY130 PDK](https://github.com/google/skywater-pdk)
+- [OpenLane / LibreLane](https://github.com/The-OpenROAD-Project/OpenLane)
+- [Magic VLSI](http://opencircuitdesign.com/magic/)
+- [Netgen LVS](http://opencircuitdesign.com/netgen/)
+- [KLayout](https://www.klayout.de/)
+
+---
+
+<p align="center">
+  Made with ❤️ at the <strong>American University in Cairo</strong> · Silicon Sprint 2026
+  <br/>
+  Apache 2.0 License — see <a href="LICENSE">LICENSE</a>
+</p>
