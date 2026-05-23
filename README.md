@@ -346,7 +346,7 @@ The notebook (`Chest_X_Ray_Images_CNN.ipynb`) covers:
 │   ├── SRAM/                     # RAM models (64×32, 128×32, 256×32)
 │   ├── Req/                      # Requantization unit
 │   ├── MUX/                      # mux2x1.sv, mux4x1.sv
-│   └── Uart ABP_shalan/          # UART + APB master/splitter
+│   └── UART APB/                 # UART + APB master/splitter
 │
 └── Testbench/
     ├── tb_npu_system.sv          # Full-system testbench
