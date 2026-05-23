@@ -28,6 +28,7 @@
   - [Datapath Pipeline](#datapath-pipeline)
   - [Instruction Set Architecture (ISA)](#instruction-set-architecture-isa)
   - [Control Unit FSM](#control-unit-fsm)
+  - [GPIO Pin Map (Project Macro)](#gpio-pin-map-project-macro)
 - [Physical Design](#physical-design)
 - [Application: Chest X-Ray Pneumonia Detection](#application-chest-x-ray-pneumonia-detection)
 - [Repository Structure](#repository-structure)
@@ -38,6 +39,7 @@
   - [RTL Simulation](#rtl-simulation)
   - [Running the LibreLane Flow](#running-the-librelane-flow)
 - [Design Metrics & Signoff](#design-metrics--signoff)
+- [Future Work](#future-work)
 - [Team](#team)
 - [References](#references)
 
@@ -186,22 +188,123 @@ The full instruction set:
 
 ### Control Unit FSM
 
-The Control Unit implements a two-level FSM:
+The Control Unit (`CU.sv`) implements a **three-level FSM hierarchy** — a main pipeline FSM, a CONV sub-FSM, and two additional sub-FSMs for REQ and ReLU sequencing.
 
-**Top-level (instruction pipeline):**
+#### Main Pipeline FSM
+
 ```
-IDLE → Fetch → Decode → Execute ──► HALT
-                  │
-                  └── (STALL loop on Fetch when busy)
+                    ┌─────────────────────────────────────────────────────┐
+                    │                   start = 0 (STALL)                 │
+                    ▼                                                      │
+  rst_n ──► IDLE ──[start]──► FETCH ──► STALL ──► DECODE ──► EXECUTE ──► NEXT
+                                 ▲                               │
+                                 │        unit_done = 1          │
+                                 └───────────────────────────────┘
+                                                  │
+                                            [opcode=HALT]
+                                                  ▼
+                                               HALTED
+                                          (npu_done = 1)
 ```
 
-Execute dispatches to one of 12 operation sub-states: `NOP`, `ReLU`, `REQ`, `ADD_BIAS`, `CONV`, `LOAD_WGT`, `LOAD_ACT_WGT`, `LOAD_ACT`, `LOAD_BIAS`, `LOAD_SCL`, `STORE`.
+| State | Action |
+|---|---|
+| `IDLE` | Wait for `start` pulse from host |
+| `FETCH` | Assert `inst_rd_en`, issue PC to IMEM |
+| `STALL` | Latch instruction word into `instr_r` (1-cycle SRAM latency) |
+| `DECODE` | Decode opcode/fields; generate `exec_pulse` on exit |
+| `EXECUTE` | Drive the active functional unit; hold until `unit_done` |
+| `NEXT` | Increment PC, swap ping-pong buffers if needed → back to FETCH |
+| `HALTED` | Assert `npu_done`; stay until reset |
 
-**CONV sub-FSM (systolic array control):**
+#### CONV Sub-FSM (Systolic Array Control)
+
 ```
-CP_IDLE → CP_START → CP_LOAD_W → CP_FEED_A → CP_WAIT → (sa_done?) → back to Fetch
+  [opcode=CONV & EXECUTE]
+         │
+         ▼
+     CP_IDLE ──► CP_START ──► CP_LOAD_W ──────────────────► CP_FEED_A ──────────────► CP_WAIT
+                               │  count cols 0…N-1           │  count rows 0…N-1        │
+                               │  sa_valid_in = 1            │  sa_valid_in = 1          │
+                               │  (load weights)             │  (stream activations)     │
+                               └──[cnt == N-1]───────────────┘                           │
+                                                                               [sa_done]─┘
+                                                                                    │
+                                                                               CP_IDLE
 ```
-This sub-FSM first loads weights into the systolic array column-by-column (`CP_LOAD_W`), then streams activations row-by-row (`CP_FEED_A`), stalling until the array signals completion.
+
+#### REQ Sub-FSM (Requantization Sequencing)
+
+```
+  [opcode=REQ & EXECUTE]
+         │
+         ▼
+  RQ_IDLE ──► RQ_PULSE ──────────────► RQ_WAIT ──[req_done]──► RQ_IDLE
+               │  req_start pulses      │
+               │  for SA_SIZE rows      │
+               └──[cnt == SA_SIZE-1]────┘
+```
+
+#### ReLU Sub-FSM
+
+```
+  [opcode=RELU & EXECUTE]
+         │
+         ▼
+  RP_IDLE ──► RP_PULSE ──────────────► RP_WAIT ──[relu_done]──► RP_IDLE
+               │  relu_start pulses     │
+               │  for SA_SIZE rows      │
+               └──[cnt == SA_SIZE-1]────┘
+```
+
+---
+
+## GPIO Pin Map (Project Macro)
+
+The nanoNPU is wrapped inside `npu_project_macro.sv`, which fits the **OpenFrame multi-project chip** port convention. All host communication happens through **5 active GPIO pins** on the bottom pads. All other GPIOs are tied to safe high-Z inputs.
+
+### Active Pin Assignment
+
+| GPIO Pin | Direction | Signal | Description |
+|---|---|---|---|
+| `gpio_bot[0]` | **IN** | `uart_rx` | Host → NPU UART receive |
+| `gpio_bot[1]` | **OUT** | `uart_tx` | NPU → Host UART transmit |
+| `gpio_bot[2]` | **OUT** | `locked` | APB bus lock status |
+| `gpio_bot[3]` | **OUT** | `npu_done` | NPU reached `HALT` instruction |
+| `gpio_bot[4]` | **OUT** | `done_processing` | All instructions processed |
+| `gpio_bot[14:5]` | — | *unused* | High-Z (safe input, no pull) |
+| `gpio_rt[8:0]` | — | *unused* | High-Z (safe input, no pull) |
+| `gpio_top[13:0]` | — | *unused* | High-Z (safe input, no pull) |
+
+### Drive Mode Encoding (SKY130 OpenFrame)
+
+| Pin | `oeb` | `dm[2:0]` | Mode |
+|---|---|---|---|
+| `BOT[0]` uart_rx | `1` | `3'b001` | Input, no pull |
+| `BOT[1]` uart_tx | `0` | `3'b110` | Strong push-pull output |
+| `BOT[2]` locked | `0` | `3'b110` | Strong push-pull output |
+| `BOT[3]` npu_done | `0` | `3'b110` | Strong push-pull output |
+| `BOT[4]` done_processing | `0` | `3'b110` | Strong push-pull output |
+| All others | `1` | `3'b001` | High-Z input, no pull |
+
+### Clock & Reset
+
+| Signal | Source | Notes |
+|---|---|---|
+| `clk` | `proj_clk_out` from green macro | Gated system clock via ICG cell |
+| `reset_n` | `proj_reset_n_out` from green macro | Held LOW when scan slot is disabled |
+| `por_n` | Power-on reset | Unused by NPU directly |
+
+### Pin Order Configuration (`pin_order.cfg`)
+
+The `pin_order.cfg` file constrains LibreLane's I/O placer to distribute the GPIO bundles around the four die edges, matching the OpenFrame multi-project chip physical contract:
+
+| Die Edge | GPIO Group | Count |
+|---|---|---|
+| **West** | `clk`, `reset_n`, `por_n` | 3 |
+| **South** | `gpio_bot[14:0]` + drive modes | 15 signal + 45 DM |
+| **East** | `gpio_rt[8:0]` + drive modes | 9 signal + 27 DM |
+| **North** | `gpio_top[13:0]` + drive modes | 14 signal + 42 DM |
 
 ---
 
@@ -264,8 +367,8 @@ Post-route signoff was performed at the worst-case slow corner (`max_ss_100C_1v6
 
 | Check | Result | Detail |
 |---|---|---|
-| Setup Timing | ✅ Clean | Zero violations  |
-| Hold Timing | ✅ Clean | Zero violations  |
+| Setup Timing | ✅ Clean | Zero violations |
+| Hold Timing | ✅ Clean | Zero violations |
 | IR Drop (VPWR) | ✅ 0.05% | Well within < 2% signoff budget |
 | IR Drop (VGND) | ✅ 0.05% | Well within < 2% signoff budget |
 | DRC | ✅ 0 violations | SkyWater 130nm rule deck — Magic & KLayout |
@@ -312,7 +415,7 @@ The notebook (`Chest_X_Ray_Images_CNN.ipynb`) covers:
 ├── Backend/                      # Physical design configurations & flow scripts
 │   └── openlane/                 # Winning run configuration
 │       ├── RTL/                  # Flattened SystemVerilog for synthesis
-│       ├── config.json           # OpenLane parameters (clock, area, antenna rules)
+│       ├── config.json           # LibreLane parameters (clock, area, antenna rules)
 │       ├── pnr.sdc               # Place-and-route timing constraints
 │       ├── signoff.sdc           # Final signoff timing constraints
 │       └── fixed_dont_change/    # Fixed DEF template (multi-project contract)
@@ -339,6 +442,7 @@ The notebook (`Chest_X_Ray_Images_CNN.ipynb`) covers:
 │   ├── Npu_apb_decoder.sv        # APB address decoder
 │   ├── Systolic Array/           # PE.sv, SA_NxN.sv, SA_NxN_top.sv, …
 │   ├── Control Unit/             # CU.SV, SA_CU.sv
+│   ├── Clock_Gating_Cell/        # ICG cell for low-power clock gating
 │   ├── Buffers/                  # Ping-pong, bias, acc, relu, preq buffers
 │   ├── ReLU/                     # relu_unit.sv, ReLU.sv
 │   ├── Bias_Adding_Unit/         # bias_adder.sv
@@ -518,6 +622,58 @@ Full reports: `Final/drc.magic.rpt`, `Final/lvs.netgen.rpt`, `Final/sta_summary.
 
 ---
 
+## Future Work
+
+The nanoNPU is a working silicon-proven baseline. The following roadmap outlines planned and suggested improvements:
+
+### 1. Complete Pooling Unit
+The `POOL` opcode is defined in the ISA but the hardware pooling unit is not yet implemented in the datapath. Planned additions:
+- **Max Pooling** — 2×2 sliding window, stride 2 (already partially handled in the ISA encoding)
+- **Average Pooling** — 2×2 sum-and-shift, required for MobileNet-style global average pool layers before the final classifier
+
+### 2. Extended Instruction Set
+The 6-bit opcode field has room for 52 additional instructions. Suggested additions:
+
+| Proposed Instruction | OP Code | Operation |
+|---|---|---|
+| `LOAD_ACT_WGT_BIAS` | `010001` | Load activations, weights, and bias in one pass |
+| `CONV_BIAS_REQ` | `010010` | Fused CONV + ADD_BIAS + REQ in a single instruction |
+| `DEPTHWISE_CONV` | `010011` | Depthwise separable convolution (MobileNet layer) |
+| `LEAKY_RELU` | `010100` | `max(αx, x)` with configurable α via scale reg |
+| `CLIP` | `010101` | Clamp output to `[min, max]` range (ReLU6 etc.) |
+| `TRANSPOSE` | `010110` | In-place tile transpose for weight reuse |
+| `ZERO_PAD` | `010111` | Zero-pad activation tile edges for convolution |
+| `LOOP` | `011000` | Repeat next N instructions K times (software loop) |
+
+### 3. Low-Power Design
+A clock gating cell (`Clk_Gating_Cell`) is already present in the RTL ([`RTL/Clock_Gating_Cell`](https://github.com/Ammar-Wahidi/NPU/tree/main/RTL/Clock_Gating_Cell)) but not yet integrated into the datapath. Planned techniques:
+- **Fine-grained clock gating** — gate each functional unit (SA, bias adder, req unit, ReLU) independently when idle using the existing ICG cell
+- **Operand isolation** — insert isolation cells on datapath inputs when a unit is clock-gated to prevent spurious switching power
+- **Multi-voltage islands** — run the SRAM and I/O ring at a lower supply voltage than the compute core
+- **Power gating** — use header/footer cells to fully cut power to idle units between inference runs
+
+### 4. Assembler & Compiler Toolchain
+Currently, NPU programs are hand-assembled by encoding binary instruction words manually in the Python host script. A proper toolchain would include:
+- **Assembler** — text `LOAD_ACT 0x00 0x10` → 32-bit binary, with label support and a symbol table
+- **Linker** — resolve tile address references and SRAM memory map automatically
+- **Compiler backend** — accept a quantized ONNX model and emit a `.npu` binary: tile the weight matrices, generate the LOAD/CONV/BIAS/REQ/RELU/STORE instruction sequence automatically, and pack weights into the SRAM binary image
+
+### 5. Larger Systolic Array — 16×16
+Scaling the systolic array from 8×8 to 16×16 increases peak compute from **128 INT8 MACs/cycle** to **512 INT8 MACs/cycle** (4×), enabling faster inference on larger CNN layers. Required changes:
+- Widen ping-pong buffers from 8 rows to 16 rows
+- Increase SRAM depth to accommodate 16-row tiles
+- Widen the `n_scale` field in the CONV instruction format (currently 5 bits, supports up to shift-31)
+- Re-run floorplanning and P&R — die area will grow significantly at 20% utilization on SKY130
+
+### 6. Additional Suggestions
+- **Batch normalization folding** — fold BN parameters into the bias and scale registers at compile time, eliminating the need for a separate BN layer in hardware
+- **Sparse weight skipping** — add a zero-detector in the systolic array PE to skip MAC operations when the weight is zero, reducing dynamic power on pruned models
+- **On-chip DMA** — replace the UART-driven APB loader with a DMA engine that bursts weights from an external SPI flash, enabling standalone inference without a host PC
+- **RISC-V integration** — replace the custom ISA CU with a small RISC-V core (e.g. PicoRV32) running firmware, using the systolic array as a memory-mapped accelerator
+- **Multi-chip tiling** — add an inter-chip link to chain multiple nanoNPU dies together for larger model inference across chips
+
+---
+
 ## Team
 
 ### RTL-to-GDSII
@@ -547,16 +703,16 @@ Full reports: `Final/drc.magic.rpt`, `Final/lvs.netgen.rpt`, `Final/sta_summary.
 - **Superscalar Out-of-Order NPU on FPGA** — Yuqiang Ge, Kapinesh Govindaraju, Sona Susan Jacob (ECE5760, Cornell University, Spring 2024)
   [https://people.ece.cornell.edu/land/courses/ece5760/FinalProjects/s2024/yg585_kg534_sj778/](https://people.ece.cornell.edu/land/courses/ece5760/FinalProjects/s2024/yg585_kg534_sj778/yg585_kg534_sj778/yg585_kg534_sj778.html)
 
-- **UART-APB** — DR.Mohamed Shalan (American University in Cairo)
-[DR.Mohamed Shalan](https://github.com/shalan)
+- **UART-APB** — Dr. Mohamed Shalan (American University in Cairo)
+  [https://github.com/shalan](https://github.com/shalan)
 
 ### Dataset
 
 - Kermany, D. et al. (2018). *Identifying Medical Diagnoses and Treatable Diseases by Image-Based Deep Learning.* Cell, 172(5), 1122–1131.
   [https://doi.org/10.1016/j.cell.2018.02.010](http://www.cell.com/cell/fulltext/S0092-8674(18)30154-5)
   Dataset: [https://data.mendeley.com/datasets/rscbjbr9sj/2](https://data.mendeley.com/datasets/rscbjbr9sj/2) — CC BY 4.0
-  
-- [Chest X-Ray Images (Pneumonia)](https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia)
+
+- [Chest X-Ray Images (Pneumonia) — Kaggle](https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia)
 
 ### Tools & PDK
 
