@@ -1,7 +1,6 @@
 # nanoNPU: Minimal Systolic Neural Inference Engine for Medical Edge AI
 
 <p align="center">
-  <!-- PHOTO: Replace with your best render of the chip/layout (e.g. npu_project_macro.png from Final_Submission/final/render/) -->
   <img width="800" height="450" alt="nanoNPU Architecture Render" src="https://github.com/user-attachments/assets/6cb2734c-41af-4814-b1bb-77e2f2706287" />
 </p>
 
@@ -36,6 +35,7 @@
   - [RTL Simulation](#rtl-simulation)
   - [Running the OpenLane Flow](#running-the-openlane-flow)
 - [Design Metrics & Signoff](#design-metrics--signoff)
+- [Team](#team)
 - [References](#references)
 
 ---
@@ -47,9 +47,7 @@
 Although the primary validation application is **chest X-ray pneumonia classification**, the ISA-driven architecture makes the nanoNPU fully **general-purpose** — any INT8-quantized convolutional or fully-connected neural network can be compiled to it by issuing the appropriate instruction sequence over UART/APB.
 
 <p align="center">
-  
-<img width="592" height="195" alt="Image" src="https://github.com/user-attachments/assets/6a86607e-c77b-45aa-8860-8a440e3a1883" />
-
+  <img width="592" height="195" alt="Image" src="https://github.com/user-attachments/assets/6a86607e-c77b-45aa-8860-8a440e3a1883" />
 </p>
 
 ---
@@ -63,7 +61,7 @@ Although the primary validation application is **chest X-ray pneumonia classific
 | **Memory** | 128×32 dual-port SRAM (data) + 32×32 instruction memory |
 | **Host Interface** | UART → APB bus bridge |
 | **Post-Processing** | Bias addition, requantization (INT32→INT8), ReLU, Average Pooling |
-| **ISA** | Custom 32-bit fixed-width, 12 instructions |
+| **ISA** | Custom 32-bit fixed-width, 12 instructions (team-designed) |
 | **Clock** | 20 MHz target (50 ns period) |
 | **Technology** | SkyWater SKY130 130nm CMOS |
 | **Die Area** | 880 µm × 1031.66 µm |
@@ -147,7 +145,7 @@ SRAM ──[LOAD_SCL]──► scale_reg ───► Req Unit  (×M0 >> n, INT8
 
 ### Instruction Set Architecture (ISA)
 
-> This ISA is Fully made by the team
+> ✍️ The nanoNPU ISA — including all opcodes, instruction formats, and encoding — was **fully designed from scratch by the team**.
 
 All NPU operations are encoded in a **32-bit fixed-width instruction** format. Two instruction layouts exist:
 
@@ -185,8 +183,6 @@ The full instruction set:
 
 ### Control Unit FSM
 
-<!-- PHOTO: Use Image 3 (the FSM state diagram photograph) here -->
-
 The Control Unit implements a two-level FSM:
 
 **Top-level (instruction pipeline):**
@@ -213,7 +209,7 @@ The full RTL-to-GDSII flow was executed using **LibreLane / OpenLane** targeting
 ### Layout
 <img width="661" height="759" alt="Image" src="https://github.com/user-attachments/assets/fb587a36-07ea-4478-9039-d506feadaec0" />
 
-### Placement Density 
+### Placement Density
 <img width="662" height="758" alt="Image" src="https://github.com/user-attachments/assets/3a58ab32-51ce-49c7-a4b0-6c9dc76578d7" />
 
 ### Routing Congestion
@@ -282,7 +278,7 @@ The notebook (`Chest_X_Ray_Images_CNN.ipynb`) covers:
 │       ├── signoff.sdc           # Final signoff timing constraints
 │       └── fixed_dont_change/    # Fixed DEF template (multi-project contract)
 │
-├── Final/             # Post-route tapeout deliverables
+├── Final/                        # Post-route tapeout deliverables
 │   ├── final/
 │   │   ├── gds/                  # npu_project_macro.gds  ← manufacturing-ready
 │   │   ├── lef/                  # Macro abstract view
@@ -376,9 +372,7 @@ python "Python Modeling/Uart APB/uart_apb.py" \
 
 ## Design Metrics & Signoff
 
-All signoff artifacts are under `Final_Submission/`. Key results at worst-case corner (`max_ss_100C_1v60`):
-
-<!-- PHOTO: Insert a screenshot of your sta_summary.rpt or the timing summary table here -->
+All signoff artifacts are under `Final/`. Key results at worst-case corner (`max_ss_100C_1v60`):
 
 | Metric | Value |
 |---|---|
@@ -389,7 +383,26 @@ All signoff artifacts are under `Final_Submission/`. Key results at worst-case c
 | LVS | ✅ Clean |
 | Worst-Case Timing Corner | max_ss_100C_1v60 |
 
-Full reports: `Final_Submission/drc.magic.rpt`, `Final_Submission/lvs.netgen.rpt`, `Final_Submission/sta_summary.rpt`.
+Full reports: `Final/drc.magic.rpt`, `Final/lvs.netgen.rpt`, `Final/sta_summary.rpt`.
+
+---
+
+## Team
+
+### RTL-to-GDSII
+
+| Name | GitHub |
+|---|---|
+| Ammar Wahidi | [@Ammar-Wahidi](https://github.com/Ammar-Wahidi) |
+| Omar Mohamed Eid | [@OmarEid66](https://github.com/OmarEid66) |
+| Mohamed Ahmed | [@mhmd-ahmdezz](https://github.com/mhmd-ahmdezz) |
+
+### Software Model (CNN Application, Training & Inference)
+
+| Name | Role | GitHub |
+|---|---|---|
+| Amr Wahidi | CNN model, training & inference | [@amr10w](https://github.com/amr10w) |
+| Ammar Wahidi | INT8 quantization | [@Ammar-Wahidi](https://github.com/Ammar-Wahidi) |
 
 ---
 
@@ -402,6 +415,9 @@ Full reports: `Final_Submission/drc.magic.rpt`, `Final_Submission/lvs.netgen.rpt
 
 - **Superscalar Out-of-Order NPU on FPGA** — Yuqiang Ge, Kapinesh Govindaraju, Sona Susan Jacob (ECE5760, Cornell University, Spring 2024)
   [https://people.ece.cornell.edu/land/courses/ece5760/FinalProjects/s2024/yg585_kg534_sj778/](https://people.ece.cornell.edu/land/courses/ece5760/FinalProjects/s2024/yg585_kg534_sj778/yg585_kg534_sj778/yg585_kg534_sj778.html)
+
+- **UART-APB** — DR.Mohamed Shalan (American University in Cairo)
+[DR.Mohamed Shalan](https://github.com/shalan)
 
 ### Dataset
 
