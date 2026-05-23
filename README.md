@@ -510,7 +510,7 @@ Full reports: `Final/drc.magic.rpt`, `Final/lvs.netgen.rpt`, `Final/sta_summary.
 ---
 
 <p align="center">
-  Made with ❤️ at the <strong>American University in Cairo</strong> · Silicon Sprint 2026
+  Made at the <strong>American University in Cairo</strong> · Silicon Sprint 2026
   <br/>
   Apache 2.0 License — see <a href="LICENSE">LICENSE</a>
 </p>
