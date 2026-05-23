@@ -31,6 +31,9 @@
 - [Physical Design](#physical-design)
 - [Application: Chest X-Ray Pneumonia Detection](#application-chest-x-ray-pneumonia-detection)
 - [Repository Structure](#repository-structure)
+- [Verification](#verification)
+  - [Test Suite Overview](#test-suite-overview)
+  - [Simulation Results](#simulation-results)
 - [Getting Started](#getting-started)
   - [RTL Simulation](#rtl-simulation)
   - [Running the LibreLane Flow](#running-the-librelane-flow)
@@ -206,7 +209,7 @@ This sub-FSM first loads weights into the systolic array column-by-column (`CP_L
 
 The full RTL-to-GDSII flow was executed using **[LibreLane](https://librelane.readthedocs.io)** — the open-source RTL-to-GDSII orchestration framework — targeting the **SkyWater SKY130 HD standard cell library**. The flow was carried out as part of the **Silicon Sprint 2026** workshop at AUC.
 
-<img width="800" height="229" alt="Image" src="https://github.com/user-attachments/assets/0f41db48-db51-4659-b41a-6243cdc6372f" />
+<!-- PHOTO: Add the LibreLane logo here -->
 
 ### Flow Overview
 
@@ -356,6 +359,62 @@ The notebook (`Chest_X_Ray_Images_CNN.ipynb`) covers:
 
 ---
 
+## Verification
+
+### Test Suite Overview
+
+The full verification suite is located in `Testbench/` and was run using **QuestaSim / ModelSim**. It consists of a system-level randomized testbench (`tb_npu_system.sv`) that drives the complete hardware stack end-to-end — from UART bytes in, through the APB bus, all the way to SRAM readback — and compares every output byte against a built-in cycle-accurate golden model.
+
+#### How It Works
+
+The testbench (`tb_npu_system.sv`) instantiates the full `npu_system_top` DUT and drives it entirely through bit-banged UART transactions, exactly as a real host would:
+
+1. **APB write tasks** — serialise address + data into UART frames using the `0xDEADA5` write magic header
+2. **APB read tasks** — issue reads using the `0xDEAD5A` read magic header and capture the 4-byte response
+3. **Memory loaders** — pack 8-bit tile data into 32-bit SRAM words and write them row by row
+4. **Instruction programmer** — encodes and writes all ISA instructions (LOAD_ACT, LOAD_WGT, LOAD_BIAS, LOAD_SCL, CONV, ADD_BIAS, REQ, ReLU, NOP, STORE, HALT) into instruction memory via APB
+5. **Golden model** — a SystemVerilog function computes the expected INT8 output for every output cell:
+   - Matrix multiply (INT8 × INT8 → INT32 accumulate)
+   - Bias addition (INT32 + INT32)
+   - Requantization: `(acc × M0) >> n` with INT8 saturation clamp (−128 … +127)
+   - Optional ReLU: `max(0, x)`
+6. **Checker** — reads back every output row from SRAM and compares against the golden model, printing PASS/FAIL per row word
+
+#### Test Cases
+
+| TC | Name | Activations | Weights | Bias | ReLU | Shift |
+|---|---|---|---|---|---|---|
+| **TC1** | Full Pipeline — Mixed Random | Rand −20 … +20 | Rand −20 … +20 | Rand −500 … +500 | ✅ Yes | 2 |
+| **TC2** | No ReLU — Mixed Random | Rand −50 … +50 | Rand −50 … +50 | Rand −1000 … +1000 | ❌ No | 4 |
+| **TC3** | Positive Data Only | Rand 1 … +30 | Rand 1 … +30 | Rand 0 … +1000 | ❌ No | 3 |
+| **TC4** | Negative Clamping — Extreme Bias | Rand −10 … +10 | Rand −10 … +10 | Rand −8000 … +8000 | ✅ Yes | 0 |
+
+Each test case resets the chip, loads randomised data into SRAM via UART, programs the full instruction sequence, starts the NPU, polls for `npu_done`, then reads back all 16 output words (8 rows × 2 words) and checks them against the golden model. All data is re-randomised each run using `$urandom_range`, so every simulation run is a unique test vector.
+
+### Simulation Results
+
+<img width="637" height="320" alt="Image" src="https://github.com/user-attachments/assets/525bf63b-cdf4-4f4d-b8a9-81258e28663f" />
+
+All 4 test cases passed in QuestaSim with **64/64 output word comparisons correct** across every run:
+
+```
+============================================================
+  STARTING RANDOMIZED SYSTEM TESTS
+============================================================
+
+[TC1] Full Pipeline (Mixed Random Data + RELU)
+[TC2] No ReLU Pipeline (Mixed Random Data)
+[TC3] Positive Data Only (No ReLU)
+[TC4] Negative Clamping Test (Mixed Data + RELU)
+
+============================================================
+  FINAL RESULTS: 64 PASSED, 0 FAILED
+  *** SUCCESS: ALL RANDOMIZED TESTS PASSED ***
+============================================================
+```
+
+---
+
 ## Getting Started
 
 ### Prerequisites
@@ -367,11 +426,12 @@ The notebook (`Chest_X_Ray_Images_CNN.ipynb`) covers:
 ### RTL Simulation
 
 ```bash
-# Using the provided ModelSim do-file (from Testbench/)
-vsim -do do_npu.do
+# Run the full randomized system testbench (TC1–TC4) in QuestaSim
+vsim -voptargs=+acc work.tb_npu_system
+run -all
 
-# Full system test (loads IMEM via APB, runs CONV → ReLU → STORE)
-vsim -sv work.tb_npu_system
+# Or using the provided do-file
+vsim -do do_npu.do
 
 # Individual unit tests
 vsim -sv work.PE_tb
@@ -379,7 +439,7 @@ vsim -sv work.SA_NxN_top_tb
 vsim -sv work.ReLU_TB
 ```
 
-The testbenches exercise the complete instruction pipeline: IMEM load → `LOAD_ACT` → `LOAD_WGT` → `CONV` → `ADD_BIAS` → `REQ` → `ReLU` → `STORE` → `HALT`.
+See the [Verification](#verification) section for a full description of each test case.
 
 ### Running the LibreLane Flow
 
