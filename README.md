@@ -33,7 +33,7 @@
 - [Repository Structure](#repository-structure)
 - [Getting Started](#getting-started)
   - [RTL Simulation](#rtl-simulation)
-  - [Running the OpenLane Flow](#running-the-openlane-flow)
+  - [Running the LibreLane Flow](#running-the-librelane-flow)
 - [Design Metrics & Signoff](#design-metrics--signoff)
 - [Team](#team)
 - [References](#references)
@@ -204,7 +204,18 @@ This sub-FSM first loads weights into the systolic array column-by-column (`CP_L
 
 ## Physical Design
 
-The full RTL-to-GDSII flow was executed using **LibreLane / OpenLane** targeting the **SkyWater SKY130 HD standard cell library**.
+The full RTL-to-GDSII flow was executed using **[LibreLane](https://librelane.readthedocs.io)** — the open-source RTL-to-GDSII orchestration framework — targeting the **SkyWater SKY130 HD standard cell library**. The flow was carried out as part of the **Silicon Sprint 2026** workshop at AUC.
+
+<img width="800" height="229" alt="Image" src="https://github.com/user-attachments/assets/0f41db48-db51-4659-b41a-6243cdc6372f" />
+
+### Flow Overview
+
+The LibreLane Classic flow was divided into two phases:
+
+| Phase | Steps | Purpose |
+|---|---|---|
+| **Signoff Prep** | Fill insertion → RCX → Post-PnR STA → IR Drop | Electrical & timing verification |
+| **Physical Signoff** | GDSII → DRC → LVS → XOR | Geometric & connectivity verification |
 
 ### Layout
 <img width="661" height="759" alt="Image" src="https://github.com/user-attachments/assets/fb587a36-07ea-4478-9039-d506feadaec0" />
@@ -223,15 +234,41 @@ The full RTL-to-GDSII flow was executed using **LibreLane / OpenLane** targeting
 | Die Area | 880 × 1031.66 µm | Fixed by multi-project chip contract |
 | Core Utilization | 20% | Area-optimized |
 | Synthesis Strategy | `AREA 2` | Minimize cell count |
-| Worst-Case Corner | `max_ss_100C_1v60` | SS, 100°C, 1.6 V |
+| Default Corner | `max_ss_100C_1v60` | SS, 100°C, 1.6 V |
 | Max Metal Layer | `met4` | Routing constraint |
 | Antenna Repair Iterations | 15 | Aggressive antenna mitigation |
+| Post-GRT Design Repair | Enabled | Slew/cap fix after global routing |
+
+### Parasitic Extraction & Multi-Corner STA
+
+After detailed routing, **OpenRCX** extracted RC parasitics from the physical geometry into three SPEF files (max/nom/min corners). Post-PnR STA then analysed all **9 PVT corners**:
+
+```
+max_ss_100C_1v60    nom_ss_100C_1v60    min_ss_100C_1v60
+max_tt_025C_1v80    nom_tt_025C_1v80    min_tt_025C_1v80
+max_ff_n40C_1v95    nom_ff_n40C_1v95    min_ff_n40C_1v95
+```
+
+### ECO Buffer Insertion
+
+The initial post-route STA revealed **Max Slew and Max Cap violations** in the `max_ss_100C_1v60` corner caused by overloaded driver outputs driving long nets. These were resolved using a **Side Load Isolation ECO** — `sky130_fd_sc_hd__buf_4` cells were inserted after overloaded drivers via the `INSERT_ECO_BUFFERS` flow in `config.json`, absorbing the excessive capacitive load without disturbing the rest of the routed design. The ECO run started from the post-detailed-routing checkpoint, re-routed only the affected nets, then re-ran the full signoff prep to verify the fix.
 
 ### Signoff Summary
 
 Post-route signoff was performed at the worst-case slow corner (`max_ss_100C_1v60`). Full STA reports, DRC/LVS sign-off logs, and SPEF parasitic files are available in `Final/`.
 
 <img width="890" height="1042" alt="Image" src="https://github.com/user-attachments/assets/79c7e749-01a3-480e-8a44-70f413f2517c" />
+
+| Check | Result | Detail |
+|---|---|---|
+| Setup Timing | ✅ Clean | Zero violations across all 9 PVT corners |
+| Hold Timing | ✅ Clean | Zero violations across all 9 PVT corners |
+| Max Slew / Cap | ✅ Resolved | ECO buf_4 insertion cleared overloaded nets |
+| IR Drop (VPWR) | ✅ 0.05% | Well within < 2% signoff budget |
+| IR Drop (VGND) | ✅ 0.05% | Well within < 2% signoff budget |
+| DRC | ✅ 0 violations | SkyWater 130nm rule deck — Magic & KLayout |
+| LVS | ✅ Circuits match uniquely | Physical layout ≡ synthesis netlist |
+| XOR GDS | ✅ 0 differences | Magic vs. KLayout GDS agree exactly |
 
 ---
 
@@ -324,7 +361,7 @@ The notebook (`Chest_X_Ray_Images_CNN.ipynb`) covers:
 ### Prerequisites
 
 - **RTL Simulation:** ModelSim / QuestaSim / Icarus Verilog / Verilator
-- **Physical Design:** [OpenLane / LibreLane](https://github.com/The-OpenROAD-Project/OpenLane) with SkyWater 130nm PDK
+- **Physical Design:** [LibreLane](https://librelane.readthedocs.io) with SkyWater 130nm PDK (installed via Nix)
 - **Python Modeling:** Python 3.9+, TensorFlow/PyTorch, NumPy, pyserial
 
 ### RTL Simulation
@@ -344,19 +381,51 @@ vsim -sv work.ReLU_TB
 
 The testbenches exercise the complete instruction pipeline: IMEM load → `LOAD_ACT` → `LOAD_WGT` → `CONV` → `ADD_BIAS` → `REQ` → `ReLU` → `STORE` → `HALT`.
 
-### Running the OpenLane Flow
+### Running the LibreLane Flow
+
+First, enter the Nix shell:
+
+```bash
+nix-shell --pure ~/librelane/shell.nix
+```
+
+**Full flow (synthesis through signoff):**
 
 ```bash
 cd Backend/openlane
-
-# Using LibreLane / OpenLane 2
-openlane config.json
-
-# Or with Docker-based OpenLane 1
-flow.tcl -design . -tag npu_run
+librelane config.json --run-tag npu_run
 ```
 
-The `config.json` already contains all optimized parameters from the successful tapeout run, including ECO buffer insertions and antenna repair settings.
+**Signoff prep only (fill → RCX → STA → IR drop):**
+
+```bash
+librelane config.json \
+    --run-tag npu_run \
+    --from OpenROAD.FillInsertion \
+    --to OpenROAD.IRDropReport \
+    --with-initial-state runs/npu_run/<step>-checker-wirelength/state_out.json
+```
+
+**ECO re-run (insert ECO buffers, re-route, re-signoff):**
+
+```bash
+librelane config.json \
+    --run-tag npu_run_eco \
+    --from Odb.InsertECOBuffers \
+    --to OpenROAD.IRDropReport \
+    --with-initial-state runs/npu_run/<step>-openroad-detailedrouting/state_out.json
+```
+
+**Physical signoff (GDSII → DRC → LVS):**
+
+```bash
+librelane config.json \
+    --run-tag npu_run_eco \
+    --from Magic.StreamOut \
+    --with-initial-state runs/npu_run_eco/<step>-openroad-irdropreport/state_out.json
+```
+
+The `config.json` already contains all optimized parameters from the successful tapeout run, including `INSERT_ECO_BUFFERS` entries and antenna repair settings — it is a drop-in ready configuration.
 
 ### Host Communication (UART–APB)
 
@@ -379,9 +448,12 @@ All signoff artifacts are under `Final/`. Key results at worst-case corner (`max
 | Technology | SkyWater SKY130 130nm |
 | Die Area | 880 × 1031.66 µm |
 | Clock Frequency | 20 MHz |
-| DRC | ✅ Clean |
-| LVS | ✅ Clean |
-| Worst-Case Timing Corner | max_ss_100C_1v60 |
+| Setup WNS (worst corner) | +0.97 ns |
+| Hold WNS (worst corner) | +0.13 ns |
+| IR Drop VPWR / VGND | 0.05% / 0.05% |
+| DRC | ✅ 0 violations |
+| LVS | ✅ Circuits match uniquely |
+| XOR GDS | ✅ 0 differences |
 
 Full reports: `Final/drc.magic.rpt`, `Final/lvs.netgen.rpt`, `Final/sta_summary.rpt`.
 
@@ -428,15 +500,17 @@ Full reports: `Final/drc.magic.rpt`, `Final/lvs.netgen.rpt`, `Final/sta_summary.
 ### Tools & PDK
 
 - [SkyWater SKY130 PDK](https://github.com/google/skywater-pdk)
-- [OpenLane / LibreLane](https://github.com/The-OpenROAD-Project/OpenLane)
-- [Magic VLSI](http://opencircuitdesign.com/magic/)
-- [Netgen LVS](http://opencircuitdesign.com/netgen/)
-- [KLayout](https://www.klayout.de/)
+- [LibreLane](https://librelane.readthedocs.io) — RTL-to-GDSII orchestration framework
+- [OpenROAD](https://github.com/The-OpenROAD-Project/OpenROAD) — Placement, CTS, routing, STA
+- [Magic VLSI](http://opencircuitdesign.com/magic/) — GDSII stream-out, DRC, SPICE extraction
+- [Netgen LVS](http://opencircuitdesign.com/netgen/) — Layout vs. Schematic verification
+- [KLayout](https://www.klayout.de/) — GDSII stream-out, DRC, XOR verification
+- [OpenRCX](https://github.com/The-OpenROAD-Project/OpenRCX) — Parasitic RC extraction
 
 ---
 
 <p align="center">
-  Made at the <strong>American University in Cairo</strong> · Silicon Sprint 2026
+  Made with ❤️ at the <strong>American University in Cairo</strong> · Silicon Sprint 2026
   <br/>
   Apache 2.0 License — see <a href="LICENSE">LICENSE</a>
 </p>
