@@ -209,7 +209,7 @@ This sub-FSM first loads weights into the systolic array column-by-column (`CP_L
 
 The full RTL-to-GDSII flow was executed using **[LibreLane](https://librelane.readthedocs.io)** — the open-source RTL-to-GDSII orchestration framework — targeting the **SkyWater SKY130 HD standard cell library**. The flow was carried out as part of the **Silicon Sprint 2026** workshop at AUC.
 
-<!-- PHOTO: Add the LibreLane logo here -->
+<img width="800" height="229" alt="Image" src="https://github.com/user-attachments/assets/e828a02e-ff73-49d9-9c82-ce125cd31c21" />
 
 ### Flow Overview
 
