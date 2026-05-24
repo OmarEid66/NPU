@@ -306,6 +306,10 @@ The `pin_order.cfg` file constrains LibreLane's I/O placer to distribute the GPI
 | **East** | `gpio_rt[8:0]` + drive modes | 9 signal + 27 DM |
 | **North** | `gpio_top[13:0]` + drive modes | 14 signal + 42 DM |
 
+### Imaginary Picture of Pin Order of NPU
+
+<img width="1448" height="1086" alt="Image" src="https://github.com/user-attachments/assets/4f1adc26-93d1-48f7-a2be-0677af62e85b" />
+
 ---
 
 ## Physical Design
