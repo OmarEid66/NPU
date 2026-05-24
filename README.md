@@ -1,4 +1,4 @@
-# nanoNPU: Minimal Systolic Neural Inference Engine for Medical Edge AI
+# NPU: Systolic Neural Inference Engine for Medical Edge AI
 
 <p align="center">
   <img width="800" height="450" alt="nanoNPU Architecture Render" src="https://github.com/user-attachments/assets/6cb2734c-41af-4814-b1bb-77e2f2706287" />
