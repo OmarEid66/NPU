@@ -634,16 +634,32 @@ The `POOL` opcode is defined in the ISA but the hardware pooling unit is not yet
 ### 2. Extended Instruction Set
 The 6-bit opcode field has room for 52 additional instructions. Suggested additions:
 
+**Memory & Compute:**
+
 | Proposed Instruction | OP Code | Operation |
 |---|---|---|
 | `LOAD_ACT_WGT_BIAS` | `010001` | Load activations, weights, and bias in one pass |
 | `CONV_BIAS_REQ` | `010010` | Fused CONV + ADD_BIAS + REQ in a single instruction |
 | `DEPTHWISE_CONV` | `010011` | Depthwise separable convolution (MobileNet layer) |
-| `LEAKY_RELU` | `010100` | `max(αx, x)` with configurable α via scale reg |
-| `CLIP` | `010101` | Clamp output to `[min, max]` range (ReLU6 etc.) |
 | `TRANSPOSE` | `010110` | In-place tile transpose for weight reuse |
 | `ZERO_PAD` | `010111` | Zero-pad activation tile edges for convolution |
 | `LOOP` | `011000` | Repeat next N instructions K times (software loop) |
+
+**Activation Functions:**
+
+| Proposed Instruction | OP Code | Operation |
+|---|---|---|
+| `LEAKY_RELU` | `010100` | `max(αx, x)` — α stored in scale reg |
+| `CLIP` | `010101` | Clamp to `[min, max]` range (ReLU6 etc.) |
+| `SIGMOID` | `011001` | `1 / (1 + e^−x)` — INT8 LUT approximation |
+| `SOFTMAX` | `011010` | `e^xᵢ / Σe^xⱼ` over output tile — classification final layer |
+| `SWISH` | `011011` | `x · sigmoid(x)` — used in EfficientNet / MobileNetV3 |
+| `GELU` | `011100` | `x · Φ(x)` — used in BERT, GPT, ViT transformer blocks |
+| `HARD_SWISH` | `011101` | `x · ReLU6(x+3) / 6` — hardware-friendly Swish approximation |
+| `ELU` | `011110` | `x if x > 0 else α(e^x − 1)` — α stored in scale reg |
+
+> 💡 Non-linear activations (Sigmoid, Softmax, Swish, GELU) are expensive to compute exactly in fixed-point hardware. The practical implementation strategy is a **256-entry INT8 lookup table (LUT)** stored in a dedicated SRAM tile — the input byte is used as the address and the output byte is the pre-computed activation value. This keeps the hardware simple (one SRAM read per element) while supporting any smooth activation function at the cost of a small SRAM tile.
+
 
 ### 3. Low-Power Design
 A clock gating cell (`Clk_Gating_Cell`) is already present in the RTL ([`RTL/Clock_Gating_Cell`](https://github.com/Ammar-Wahidi/NPU/tree/main/RTL/Clock_Gating_Cell)) but not yet integrated into the datapath. Planned techniques:
@@ -664,8 +680,25 @@ Scaling the systolic array from 8×8 to 16×16 increases peak compute from **128
 - Increase SRAM depth to accommodate 16-row tiles
 - Widen the `n_scale` field in the CONV instruction format (currently 5 bits, supports up to shift-31)
 - Re-run floorplanning and P&R — die area will grow significantly at 20% utilization on SKY130
+- 
+### 6. Floating-Point NPU Variant
+The current nanoNPU is fully INT8 — all activations, weights, and accumulations are fixed-point integers, which requires the model to be quantized before deployment. A natural evolution is a **floating-point NPU** that can run any standard FP32 or FP16 inference model directly without any quantization step:
 
-### 6. Additional Suggestions
+- **FP16 (IEEE 754 half-precision)** — the practical target for edge silicon; FP16 MACs are ~4× the area of INT8 MACs but eliminate all quantization error and model-preparation overhead. FP16 is the standard for embedded GPU inference (e.g. ARM Mali, Apple Neural Engine)
+- **BF16 (Brain Float 16)** — same 8-bit exponent as FP32, 7-bit mantissa; better dynamic range than FP16 at identical hardware cost. Used in Google TPUs and most modern AI accelerators
+- **FP32 (full precision)** — highest accuracy, largest area; suitable for training accelerators or high-accuracy medical inference where quantization error is unacceptable
+- **Mixed-precision** — FP16 activations with FP32 accumulators (the standard in modern GPU tensor cores), giving full numerical stability without full FP32 memory bandwidth
+
+Key hardware changes required:
+- Replace the INT8 PE multiplier with an IEEE 754 FP16/BF16 multiply-add unit
+- Replace the INT32 accumulator with an FP32 accumulator to avoid catastrophic cancellation
+- Remove the requantization unit (REQ instruction becomes unnecessary)
+- Widen the SRAM datapath from 8-bit to 16-bit per element (doubles memory bandwidth requirement)
+- Add a FP-to-INT8 conversion unit at the output for systems that mix FP inference with INT8 I/O
+
+> 💡 A pragmatic intermediate step is **posit arithmetic** (Type III unum) — an alternative floating-point format that delivers FP32-equivalent accuracy in 16 bits with simpler hardware than IEEE 754, and is gaining traction in neuromorphic and edge-AI ASIC research.
+
+### 7. Additional Suggestions
 - **Batch normalization folding** — fold BN parameters into the bias and scale registers at compile time, eliminating the need for a separate BN layer in hardware
 - **Sparse weight skipping** — add a zero-detector in the systolic array PE to skip MAC operations when the weight is zero, reducing dynamic power on pruned models
 - **On-chip DMA** — replace the UART-driven APB loader with a DMA engine that bursts weights from an external SPI flash, enabling standalone inference without a host PC
